@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.cursor/
+.lighthouse/
+.netlify/
+.opencode/
+tsconfig.tsbuildinfo
+next-env.d.ts
