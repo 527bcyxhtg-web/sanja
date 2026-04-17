@@ -1,0 +1,122 @@
+---
+description: Design tokens, typography, spacing, and visual language for this project
+globs: ["src/**/*.css", "src/**/*.tsx", "src/**/*.module.css"]
+alwaysApply: false
+---
+
+# Design System — Luxury Plush Aesthetic
+
+## Colour palette (CSS custom properties — never hard-code hex)
+```css
+--cream: #f7f2ea;           /* primary text, light backgrounds */
+--blush: #e8c5b0;           /* secondary warm accent */
+--rose: #c97b6e;            /* CTA hover, accent highlights */
+--velvet: #14080f;          /* near-black rich bg variant */
+--deep: #080407;            /* page background */
+--gold: #c9a96e;            /* primary accent, cursor, borders */
+--gold2: #e8d5a3;           /* lighter gold, tag labels */
+--gold-deep: #8a7349;       /* muted gold for dividers */
+--champagne: #f3e8d4;       /* card highlights */
+--platinum: rgba(247,242,234,0.06); /* subtle glass tint */
+--mauve: #8b5e7a;           /* story/emotional accent */
+--mist: #c9b8c4;            /* inactive / muted text */
+--soft-pink: #f0d5d0;       /* decorative motifs */
+--shadow-luxury: 0 32px 100px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,169,110,0.08) inset;
+--ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+```
+
+## Typography
+- `--font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif` — headings, hero, pull quotes
+- `--font-body: var(--font-inter), "Inter", -apple-system, sans-serif` — body, labels, UI
+
+### Type scale (awwwards level)
+```css
+/* Hero headline */
+font-family: var(--font-display);
+font-size: clamp(4rem, 10vw, 9rem);
+font-weight: 300;
+letter-spacing: -0.03em;
+line-height: 0.9;
+
+/* Section heading */
+font-size: clamp(2.4rem, 5vw, 5rem);
+font-weight: 400;
+letter-spacing: -0.02em;
+
+/* Overline / label */
+font-family: var(--font-body);
+font-size: 0.65rem;
+font-weight: 600;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--gold2);
+
+/* Body */
+font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+font-weight: 300;
+line-height: 1.7;
+color: rgba(247, 242, 234, 0.7);
+```
+
+## Spacing rhythm
+Use multiples of 8px: `8 16 24 32 48 64 96 128 160 200px`.
+Section padding: `clamp(80px, 12vw, 160px) 0`.
+
+## Glass morphism card
+```css
+.card {
+  background: rgba(247, 242, 234, 0.04);
+  border: 1px solid rgba(201, 169, 110, 0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 2px; /* intentionally minimal */
+  box-shadow: var(--shadow-luxury);
+  transition: border-color 0.4s var(--ease-out-expo),
+              box-shadow 0.4s var(--ease-out-expo);
+}
+.card:hover {
+  border-color: rgba(201, 169, 110, 0.28);
+  box-shadow: 0 48px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.2) inset;
+}
+```
+
+## Button styles
+```css
+/* Primary CTA */
+.btn-primary {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--cream);
+  padding: 14px 36px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: background 0.35s var(--ease-out-expo), color 0.35s;
+}
+.btn-primary:hover {
+  background: var(--gold);
+  color: var(--deep);
+}
+```
+
+## Grain / ambient overlay (already in `body::before`)
+Always `pointer-events: none; z-index: 0; position: fixed; opacity: 0.025`.
+
+## Marquee text
+Use `<Marquee />` component from `@/components/ui/Marquee` — do not build a new one.
+
+## Dividers
+Use `<SectionDivider />` from `@/components/ui/SectionDivider` — thin gold line, optional label.
+
+## Image treatment
+- Always provide `.webp` first, `.png` fallback
+- Use `<ProgressiveImage />` for above-fold images
+- `object-fit: cover` with `aspect-ratio` set on wrapper, never fixed height
+- Subtle `filter: brightness(0.85) saturate(1.1)` on product images for mood
+
+## Mobile
+- Navigation: hamburger at `< 768px`, full menu at `>= 768px`
+- Reduce hero font-size with `clamp()`
+- Touch: disable custom cursor (`display: none` on `.cursor-dot`, `.cursor-ring`)
+- Lenis: disabled on touch-only devices (already handled in provider)

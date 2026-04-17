@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "workspace_slug": "Users-korisnik-CascadeProjects-windsurf-project-sanja-plush",
+  "transcripts_root": "/Users/korisnik/.cursor/projects/Users-korisnik-CascadeProjects-windsurf-project-sanja-plush/agent-transcripts",
+  "last_full_scan_at_ms": 1776359122000,
+  "transcripts": [
+    {
+      "relpath": "05cf05fb-cc35-459e-9e56-5a87d12bfc55/05cf05fb-cc35-459e-9e56-5a87d12bfc55.jsonl",
+      "mtime_ms": 1776359084945,
+      "size": 9403
+    },
+    {
+      "relpath": "0ac566a6-23c9-4813-b9ad-6fbcfa4605f4/0ac566a6-23c9-4813-b9ad-6fbcfa4605f4.jsonl",
+      "mtime_ms": 1776359092746,
+      "size": 4205
+    },
+    {
+      "relpath": "1377f126-2b97-42b4-a29d-0968c813d0dc/1377f126-2b97-42b4-a29d-0968c813d0dc.jsonl",
+      "mtime_ms": 1776358958305,
+      "size": 10862
+    },
+    {
+      "relpath": "18caedf9-3b39-49fa-9fe1-3712210c7331/18caedf9-3b39-49fa-9fe1-3712210c7331.jsonl",
+      "mtime_ms": 1776216221238,
+      "size": 6672
+    },
+    {
+      "relpath": "26b920da-43af-4f5a-9fca-6b0a48005520/26b920da-43af-4f5a-9fca-6b0a48005520.jsonl",
+      "mtime_ms": 1776216153677,
+      "size": 5772
+    },
+    {
+      "relpath": "35647781-3e1b-427c-99bc-710b7a353e44/35647781-3e1b-427c-99bc-710b7a353e44.jsonl",
+      "mtime_ms": 1776359092945,
+      "size": 3512
+    },
+    {
+      "relpath": "36cabe65-e352-41bb-9b7c-2602e567c5bb/36cabe65-e352-41bb-9b7c-2602e567c5bb.jsonl",
+      "mtime_ms": 1776216103600,
+      "size": 20777
+    },
+    {
+      "relpath": "3733083e-9bf3-4b23-bbd9-adbb4c9f536d/3733083e-9bf3-4b23-bbd9-adbb4c9f536d.jsonl",
+      "mtime_ms": 1776359040038,
+      "size": 6696
+    },
+    {
+      "relpath": "4f19e7fa-7c42-42b4-a764-b1d3d5c3ef1a/4f19e7fa-7c42-42b4-a764-b1d3d5c3ef1a.jsonl",
+      "mtime_ms": 1776216594826,
+      "size": 12849
+    },
+    {
+      "relpath": "616e82bf-7538-4967-bcff-a023f9db1dff/616e82bf-7538-4967-bcff-a023f9db1dff.jsonl",
+      "mtime_ms": 1776216196201,
+      "size": 11410
+    },
+    {
+      "relpath": "700244fe-29fe-44e7-995d-51d99adb83d6/700244fe-29fe-44e7-995d-51d99adb83d6.jsonl",
+      "mtime_ms": 1776209796545,
+      "size": 55335
+    },
+    {
+      "relpath": "800e1bb7-dfef-4f65-9360-ffc7362a515c/800e1bb7-dfef-4f65-9360-ffc7362a515c.jsonl",
+      "mtime_ms": 1776136718448,
+      "size": 163
+    },
+    {
+      "relpath": "86dccdfa-aaa3-4f23-9e25-367465887e41/86dccdfa-aaa3-4f23-9e25-367465887e41.jsonl",
+      "mtime_ms": 1776216413439,
+      "size": 7207
+    },
+    {
+      "relpath": "89b59738-75fe-417a-9b39-586d758b8e03/89b59738-75fe-417a-9b39-586d758b8e03.jsonl",
+      "mtime_ms": 1776215049300,
+      "size": 72553
+    },
+    {
+      "relpath": "9a0ff205-4c2d-45d5-a5c9-0816836c696a/9a0ff205-4c2d-45d5-a5c9-0816836c696a.jsonl",
+      "mtime_ms": 1776216223435,
+      "size": 7654
+    },
+    {
+      "relpath": "9c2ad143-a1a4-4b60-9005-3c41e78cc95a/9c2ad143-a1a4-4b60-9005-3c41e78cc95a.jsonl",
+      "mtime_ms": 1776359058250,
+      "size": 203
+    },
+    {
+      "relpath": "9dc2cc23-6062-46e4-b671-0104c069468b/9dc2cc23-6062-46e4-b671-0104c069468b.jsonl",
+      "mtime_ms": 1776359104699,
+      "size": 192
+    },
+    {
+      "relpath": "bc72ae03-e8b8-4c0c-a423-0fd57f5dfbd4/bc72ae03-e8b8-4c0c-a423-0fd57f5dfbd4.jsonl",
+      "mtime_ms": 1776359106116,
+      "size": 686
+    },
+    {
+      "relpath": "c47682b7-1147-4907-b890-44931ad7ad97/c47682b7-1147-4907-b890-44931ad7ad97.jsonl",
+      "mtime_ms": 1776358448647,
+      "size": 24391
+    },
+    {
+      "relpath": "cc46cde0-c300-43ec-839e-bfd3d15148e1/cc46cde0-c300-43ec-839e-bfd3d15148e1.jsonl",
+      "mtime_ms": 1776216139297,
+      "size": 3821
+    },
+    {
+      "relpath": "e3ccbe35-dad9-45d0-a70c-01fe348421ba/e3ccbe35-dad9-45d0-a70c-01fe348421ba.jsonl",
+      "mtime_ms": 1776134771726,
+      "size": 2386
+    },
+    {
+      "relpath": "fd24ad47-9e72-4509-9f37-c6e6b7849772/fd24ad47-9e72-4509-9f37-c6e6b7849772.jsonl",
+      "mtime_ms": 1776210259521,
+      "size": 1770
+    }
+  ]
+}

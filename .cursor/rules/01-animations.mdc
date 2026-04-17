@@ -1,0 +1,75 @@
+---
+description: GSAP, ScrollTrigger, and Lenis animation patterns for this project
+globs: ["src/**/*.tsx", "src/**/*.ts", "src/lib/gsapUtils.ts"]
+alwaysApply: false
+---
+
+# Animation System — GSAP + ScrollTrigger + Lenis
+
+## Imports
+```ts
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger); // once, at module level
+```
+Never import from `"gsap/all"` — tree-shake properly.
+
+## Utility functions (use these, don't reinvent)
+All live in `src/lib/gsapUtils.ts`:
+- `createTextReveal(elements, trigger, options)` — clip-path + y slide
+- `createImageReveal(elements, trigger, options)` — for images/cards
+- `createFadeReveal(elements, trigger, options)` — opacity + y
+- `createStoryStageReveal(...)` — multi-element stagger for story sections
+
+## Component animation pattern
+```tsx
+useEffect(() => {
+  if (reducedMotion) return;           // always guard
+  const ctx = gsap.context(() => {
+    // all GSAP calls here
+    createTextReveal(headingRef.current, sectionRef.current);
+  }, sectionRef);
+  return () => ctx.revert();           // always clean up
+}, [reducedMotion]);
+```
+
+## ScrollTrigger defaults for this project
+```ts
+scrollTrigger: {
+  trigger: element,
+  start: "top 85%",               // fire when 85% from top
+  toggleActions: "play none none none", // fire once
+}
+```
+For pinned sections use `pin: true, scrub: 1`.
+
+## Lenis integration
+Lenis is already wired in `SmoothScroll` provider — do NOT instantiate a second Lenis instance.
+To scroll programmatically: `lenis.scrollTo(target, { duration: 1.2 })`.
+
+## GSAP quickTo (cursor / hover)
+```ts
+const xTo = gsap.quickTo(el, "x", { duration: 0.4, ease: "power3" });
+const yTo = gsap.quickTo(el, "y", { duration: 0.4, ease: "power3" });
+onMouseMove(e) { xTo(e.clientX); yTo(e.clientY); }
+```
+
+## Awwwards-level techniques
+- **Stagger reveals:** `stagger: { each: 0.08, from: "start" }` for word/char splits
+- **Parallax:** bind to `ScrollTrigger` scrub, move at 0.3× scroll speed
+- **Clip-path wipe:** `clipPath: "inset(0 100% 0 0)"` → `"inset(0 0% 0 0)"` for horizontal reveals
+- **Scale entrance:** `{ scale: 1.05, opacity: 0 }` → `{ scale: 1, opacity: 1 }` on images
+- **Timeline pinning:** `gsap.timeline({ scrollTrigger: { pin: true, scrub: true } })`
+
+## Performance
+- Wrap all `.fromTo` in `gsap.context()` for proper cleanup
+- Use `will-change: transform` in CSS only on animated elements
+- Prefer `transform` (x/y/scale/rotation) over `top/left/width/height`
+- Kill ScrollTrigger instances on unmount: `ScrollTrigger.getAll().forEach(t => t.kill())` inside cleanup
+
+## Reduced motion
+```ts
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+const reducedMotion = useReducedMotion();
+if (reducedMotion) return; // skip GSAP, show static state
+```

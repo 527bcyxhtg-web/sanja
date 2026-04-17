@@ -1,0 +1,88 @@
+.glassCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(28px) saturate(1.15);
+  -webkit-backdrop-filter: blur(28px) saturate(1.15);
+  border-radius: 22px;
+  padding: 2px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.glassContent {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 252, 248, 0.94) 0%,
+    rgba(247, 240, 232, 0.9) 100%
+  );
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.glassBorder {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    var(--glow-color, rgba(102, 126, 234, 0.5)),
+    transparent 50%,
+    var(--glow-color, rgba(102, 126, 234, 0.5))
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderRotate 10s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    background: linear-gradient(
+      0deg,
+      var(--glow-color, rgba(102, 126, 234, 0.5)),
+      transparent 50%,
+      var(--glow-color, rgba(102, 126, 234, 0.5))
+    );
+  }
+  25% {
+    background: linear-gradient(
+      90deg,
+      var(--glow-color, rgba(102, 126, 234, 0.5)),
+      transparent 50%,
+      var(--glow-color, rgba(102, 126, 234, 0.5))
+    );
+  }
+  50% {
+    background: linear-gradient(
+      180deg,
+      var(--glow-color, rgba(102, 126, 234, 0.5)),
+      transparent 50%,
+      var(--glow-color, rgba(102, 126, 234, 0.5))
+    );
+  }
+  75% {
+    background: linear-gradient(
+      270deg,
+      var(--glow-color, rgba(102, 126, 234, 0.5)),
+      transparent 50%,
+      var(--glow-color, rgba(102, 126, 234, 0.5))
+    );
+  }
+  100% {
+    background: linear-gradient(
+      360deg,
+      var(--glow-color, rgba(102, 126, 234, 0.5)),
+      transparent 50%,
+      var(--glow-color, rgba(102, 126, 234, 0.5))
+    );
+  }
+}

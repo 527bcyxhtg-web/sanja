@@ -1,0 +1,76 @@
+---
+description: Figma MCP → code for sanja-plush (CSS Modules, tokens, motion). Use when implementing UI from Figma or translating design specs.
+alwaysApply: false
+---
+
+# Figma → sanja-plush implementation
+
+These rules align Figma MCP output with this repository. Follow them whenever `get_design_context`, `get_metadata`, `get_screenshot`, or Code Connect is involved.
+
+## Required flow (do not skip)
+
+1. **`get_design_context`** on the exact node(s) you are implementing.
+2. If the payload is too large, **`get_metadata`** for the subtree map, then narrow **`get_design_context`** to specific nodes.
+3. **`get_screenshot`** for the variant you are matching (layout, type rhythm, states).
+4. Download assets from the MCP payload when provided; prefer provided sources over placeholders.
+5. Implement using the conventions below — **not** by pasting Tailwind from Figma output verbatim.
+6. Run `npm run lint && npm run typecheck` before considering the task done.
+
+## Stack translation
+
+| Figma MCP often suggests | This project |
+| --- | --- |
+| React + Tailwind | **Next.js 15 App Router** + **React 19** + **TypeScript strict** |
+| Utility classes | **CSS Modules** only (`ComponentName.module.css` next to `ComponentName.tsx`) |
+| Inline colors | **`var(--token)`** from `src/styles/globals.css` — never raw hex in components |
+| Default imports | **`@/*`** path alias (`@/components/...`, `@/hooks/...`, `@/lib/...`) |
+
+## Design tokens (bind Figma colors to CSS variables)
+
+Map Figma fills/strokes to these tokens where possible:
+
+- **Page / void:** `--deep`, `--velvet`
+- **Primary text / light surfaces:** `--cream`, `--champagne`, `--mist`
+- **Accent / borders / focus:** `--gold`, `--gold2`, `--gold-deep`
+- **CTA / warmth:** `--rose`, `--blush`, `--soft-pink`
+- **Story accent:** `--mauve`
+- **Display / body fonts:** `font-family: var(--font-display)` / `var(--font-body)` (Cormorant Garamond / Inter)
+
+## Component placement
+
+| Kind | Path |
+| --- | --- |
+| Page sections | `src/components/layout/` |
+| Reusable UI | `src/components/ui/` |
+| 3D / R3F | `src/components/3d/` (lazy-load canvases with `next/dynamic`, `{ ssr: false }`) |
+| Motion helpers | `src/lib/gsapUtils.ts` |
+| Hooks | `src/hooks/` |
+
+One **PascalCase** component per `.tsx` file; co-located `*.module.css`.
+
+## Motion and interaction
+
+- Guard all timeline / ScrollTrigger work with **`useReducedMotion()`**; provide non-animated fallbacks.
+- Clean up GSAP with **`gsap.context(() => { ... }).revert()`** in `useEffect` cleanup.
+- Custom cursor: interactive elements use **`data-cursor`** attributes per existing patterns; do not reintroduce the OS cursor on desktop without checking `Navigation` / cursor components.
+
+## Luxury / awwwards bar (from product rules)
+
+- Prefer **asymmetry**, **depth layers**, and **scroll entry motion** over flat symmetric layouts.
+- Keep **border-radius minimal** on premium surfaces (≤ 4px convention for “luxury” chrome unless the section already breaks that pattern consistently).
+- Below-fold imagery: **`loading="lazy"`** unless there is an explicit LCP reason not to.
+
+## Assets from Figma MCP
+
+- If the server returns a **localhost** asset URL for an image or SVG, **use it directly** in dev; do not swap in generic placeholders.
+- Persist production assets under **`public/`** (or existing project image conventions such as `src/lib/siteImages.ts`) and reference them with stable paths for static export.
+
+## Code quality gates
+
+- No **`any`** in TypeScript.
+- No **`console.log`** in production UI code.
+- Prefer extending **`createTextReveal` / `createImageReveal` / `createFadeReveal`** from `@/lib/gsapUtils` over one-off scroll animation spaghetti.
+
+## After `create_design_system_rules` (Figma MCP tool)
+
+When the Figma MCP **`create_design_system_rules`** tool is available, run it with `clientLanguages: "typescript"` and `clientFrameworks: "react"`, then **merge** any new generic guidance from that response into this file so Cursor stays aligned with Figma’s latest template.

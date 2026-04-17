@@ -1,0 +1,45 @@
+---
+description: Project overview, stack, and non-negotiable conventions
+alwaysApply: true
+---
+
+# sanja-plush — Project Context
+
+## Identity
+Premium e-commerce landing page for **Sanja Krstić** — handmade luxury crochet/amigurumi toys.
+Target aesthetic: **awwwards Site of the Day** level. Every component, animation, and interaction must feel deliberate, polished, and cinematic.
+
+## Stack (do not change without explicit instruction)
+- **Next.js 15** (static export, `output: "export"`) + **React 19**
+- **TypeScript** strict mode — every prop and return type must be explicit
+- **GSAP 3** + ScrollTrigger + Lenis smooth scroll
+- **React Three Fiber** + Drei for WebGL/3D
+- **CSS Modules** for component styles — no Tailwind, no inline style objects unless for GSAP targets
+- **Supabase** (browser-side, anon key only)
+- Deploy: **Cloudflare Pages** via `wrangler pages deploy out`
+
+## Path alias
+`@/*` → `./src/*` — always use this, never relative `../../../`
+
+## File conventions
+- Components: PascalCase, one component per file
+- CSS Modules: `ComponentName.module.css` alongside the `.tsx`
+- Hooks: `useXxx.ts` in `src/hooks/`
+- Utilities: `src/lib/`
+- Dynamic 3D imports: always `next/dynamic` with `{ ssr: false }`
+
+## Scripts
+```bash
+npm run dev          # dev server :3000
+npm run build        # static export → ./out
+npm run lint         # eslint
+npm run typecheck    # tsc --noEmit
+npm run pages:deploy # build + CF deploy
+```
+
+## Golden rules
+1. Run `npm run lint && npm run typecheck` mentally before every file save — no red lines ship.
+2. Every animation must respect `prefers-reduced-motion` (check `useReducedMotion`).
+3. All 3D canvas components must be lazy-loaded (`next/dynamic`, `ssr: false`).
+4. Never hard-code colours — always use CSS custom properties from `globals.css`.
+5. No `console.log` in production components.

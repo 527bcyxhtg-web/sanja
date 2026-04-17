@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanja Krstić — Ručno Pletene Plišane Igračke</title>
+<meta name="description" content="Jedinstvene ručno pletene plišane igračke sa ljubavlju. Svaka igračka je unikatna.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- GSAP + all plugins -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Lenis smooth scroll -->
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+<style>
+/* ════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #060504;
+  --bg-warm: #0c0a08;
+  --surface: #121110;
+  --surface-2: #1a1816;
+  --cream: #f2ece3;
+  --cream-50: rgba(242,236,227,0.5);
+  --cream-20: rgba(242,236,227,0.2);
+  --cream-10: rgba(242,236,227,0.1);
+  --cream-05: rgba(242,236,227,0.05);
+  --gold: #c8a45c;
+  --gold-light: #e2cb8b;
+  --rose: #c9908f;
+  --rose-deep: #7a4f4f;
+  --lavender: #a797b8;
+  --sage: #8fa87a;
+  --peach: #dbb896;
+
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --ff-body: 'Inter', system-ui, sans-serif;
+  --ff-mono: 'JetBrains Mono', monospace;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.45, 0, 0.15, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scrollbar-width: thin; scrollbar-color: var(--gold) var(--bg); }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+body {
+  font-family: var(--ff-body); background: var(--bg); color: var(--cream);
+  overflow-x: hidden; -webkit-font-smoothing: antialiased; line-height: 1.7;
+}
+
+::selection { background: var(--gold); color: var(--bg); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ════════════════════════════════════════════════════════════
+   CURSOR
+   ════════════════════════════════════════════════════════════ */
+.cursor { position: fixed; pointer-events: none; z-index: 99999; mix-blend-mode: difference; }
+.cursor-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+.cursor-ring {
+  width: 44px; height: 44px; border: 1px solid var(--gold); border-radius: 50%;
+  transition: width 0.4s var(--ease-expo), height 0.4s var(--ease-expo), opacity 0.3s;
+}
+.cursor-ring.active { width: 72px; height: 72px; opacity: 0.5; }
+.cursor-text {
+  font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--cream); white-space: nowrap;
+  opacity: 0; transform: scale(0.5); transition: all 0.3s var(--ease-expo);
+}
+.cursor-text.visible { opacity: 1; transform: scale(1); }
+
+@media (hover: none), (max-width: 768px) { .cursor { display: none !important; } }
+
+/* ════════════════════════════════════════════════════════════
+   LOADER
+   ════════════════════════════════════════════════════════════ */
+#loader {
+  position: fixed; inset: 0; z-index: 10000; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#loader.done { pointer-events: none; }
+
+.loader-counter {
+  font-family: var(--ff-display); font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 300; color: var(--cream); line-height: 1; letter-spacing: -0.04em;
+}
+.loader-label {
+  font-family: var(--ff-mono); font-size: 0.6rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--gold); margin-top: 1.5rem;
+}
+.loader-line { width: 1px; height: 60px; background: var(--cream-10); margin-top: 2rem; position: relative; overflow: hidden; }
+.loader-line-fill { position: absolute; top: 0; left: 0; width: 100%; height: 0%; background: var(--gold); }
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION
+   ════════════════════════════════════════════════════════════ */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 2rem clamp(1.5rem, 4vw, 4rem);
+  display: flex; align-items: center; justify-content: space-between;
+  mix-blend-mode: difference;
+}
+
+.nav-logo {
+  font-family: var(--ff-display); font-size: 1.3rem; font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.nav-logo span { color: var(--gold); }
+
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+.nav-links a {
+  font-size: 0.7rem; font-weight: 400; letter-spacing: 0.25em;
+  text-transform: uppercase; position: relative; padding-bottom: 2px;
+  overflow: hidden;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+  background: var(--gold); transform: translateX(-101%);
+  transition: transform 0.5s var(--ease-expo);
+}
+.nav-links a:hover::after { transform: translateX(0); }
+
+.nav-right { display: flex; align-items: center; gap: 2rem; }
+.nav-cart-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+}
+.cart-count {
+  width: 18px; height: 18px; background: var(--gold); color: var(--bg);
+  border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.55rem; font-weight: 600;
+}
+
+.menu-btn { display: none; width: 32px; height: 20px; position: relative; z-index: 1001; }
+.menu-btn span {
+  position: absolute; left: 0; width: 100%; height: 1px; background: var(--cream);
+  transition: all 0.4s var(--ease-expo);
+}
+.menu-btn span:nth-child(1) { top: 0; }
+.menu-btn span:nth-child(2) { top: 50%; }
+.menu-btn span:nth-child(3) { bottom: 0; }
+.menu-btn.open span:nth-child(1) { top: 50%; transform: rotate(45deg); }
+.menu-btn.open span:nth-child(2) { opacity: 0; }
+.menu-btn.open span:nth-child(3) { bottom: 50%; transform: rotate(-45deg); }
+
+/* Mobile menu */
+.mobile-nav {
+  position: fixed; inset: 0; z-index: 999; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
+  clip-path: circle(0% at calc(100% - 3rem) 2rem);
+  transition: clip-path 0.8s var(--ease-expo);
+}
+.mobile-nav.open { clip-path: circle(150% at calc(100% - 3rem) 2rem); }
+.mobile-nav a {
+  font-family: var(--ff-display); font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 300; font-style: italic; opacity: 0; transform: translateY(20px);
+  transition: opacity 0.4s, transform 0.5s var(--ease-expo), color 0.3s;
+}
+.mobile-nav.open a { opacity: 1; transform: translateY(0); }
+.mobile-nav a:hover { color: var(--gold); }
+
+/* ════════════════════════════════════════════════════════════
+   HERO
+   ════════════════════════════════════════════════════════════ */
+#hero {
+  position: relative; height: 100vh; min-height: 700px;
+  display: flex; align-items: center; overflow: hidden;
+}
+
+#hero-canvas { position: absolute; inset: 0; z-index: 1; }
+
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 25% 50%, rgba(200,164,92,0.06), transparent 60%),
+    radial-gradient(ellipse 50% 70% at 75% 30%, rgba(201,144,143,0.04), transparent 60%),
+    linear-gradient(to top, var(--bg) 0%, transparent 30%);
+}
+
+/* Floating real images */
+.hero-float {
+  position: absolute; z-index: 2; pointer-events: none; will-change: transform;
+  border: 1px solid var(--cream-10); overflow: hidden;
+}
+.hero-float img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.7) brightness(0.8) contrast(1.1);
+}
+.hero-float-1 { width: clamp(120px, 15vw, 200px); aspect-ratio: 3/4; top: 12%; right: 8%; }
+.hero-float-2 { width: clamp(100px, 12vw, 160px); aspect-ratio: 1; bottom: 22%; right: 18%; }
+.hero-float-3 { width: clamp(80px, 10vw, 140px); aspect-ratio: 4/5; top: 25%; right: 32%; }
+
+.hero-content { position: relative; z-index: 3; padding: 0 clamp(2rem, 8vw, 10rem); max-width: 850px; }
+
+.hero-eyebrow {
+  font-family: var(--ff-mono); font-size: 0.6rem; letter-spacing: 0.5em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 1rem; overflow: hidden;
+}
+.hero-eyebrow-line { width: 40px; height: 1px; background: var(--gold); }
+.hero-eyebrow span { display: inline-block; }
+
+.hero-title {
+  font-family: var(--ff-display); font-size: clamp(3.2rem, 8.5vw, 8rem);
+  font-weight: 300; line-height: 1.0; letter-spacing: -0.03em;
+}
+.hero-title .word { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.hero-title .word-inner { display: inline-block; will-change: transform; }
+.hero-title em { font-style: italic; color: var(--gold); font-weight: 400; }
+
+.hero-body {
+  font-size: 0.95rem; font-weight: 300; color: var(--cream-50);
+  max-width: 420px; line-height: 1.85; margin-top: 2rem;
+}
+
+.hero-actions { display: flex; align-items: center; gap: 2.5rem; margin-top: 2.5rem; }
+
+/* Magnetic button */
+.mag-btn {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  padding: 1.1rem 2.8rem; background: var(--gold); color: var(--bg);
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
+  position: relative; overflow: hidden; will-change: transform;
+  transition: transform 0.4s var(--ease-expo), box-shadow 0.4s;
+}
+.mag-btn::before {
+  content: ''; position: absolute; inset: 0; background: var(--cream);
+  transform: translateY(101%); transition: transform 0.5s var(--ease-expo);
+}
+.mag-btn:hover { box-shadow: 0 12px 40px rgba(200,164,92,0.25); }
+.mag-btn:hover::before { transform: translateY(0); }
+.mag-btn span { position: relative; z-index: 1; }
+.mag-btn .btn-arrow {
+  position: relative; z-index: 1; width: 16px; height: 16px;
+  transition: transform 0.3s var(--ease-expo);
+}
+.mag-btn:hover .btn-arrow { transform: translateX(4px); }
+
+.link-btn {
+  font-size: 0.65rem; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--cream-50); display: flex; align-items: center; gap: 0.5rem;
+  transition: color 0.3s;
+}
+.link-btn:hover { color: var(--gold); }
+
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+}
+.hero-scroll span {
+  font-family: var(--ff-mono); font-size: 0.5rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--cream-20);
+  writing-mode: vertical-rl;
+}
+.scroll-bar { width: 1px; height: 50px; background: var(--cream-10); position: relative; overflow: hidden; }
+.scroll-bar::after {
+  content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
+  background: var(--gold); animation: scrollPulse 2.5s var(--ease-expo) infinite;
+}
+@keyframes scrollPulse { 0% { top: -100%; } 100% { top: 100%; } }
+
+/* ════════════════════════════════════════════════════════════
+   IMAGE REVEAL EFFECT
+   ════════════════════════════════════════════════════════════ */
+.img-reveal {
+  position: relative; overflow: hidden;
+}
+.img-reveal::after {
+  content: ''; position: absolute; inset: 0; background: var(--bg-warm);
+  transform-origin: left; transition: transform 1.2s var(--ease-expo);
+}
+.img-reveal.revealed::after { transform: scaleX(0); transform-origin: right; }
+
+.img-reveal img {
+  transform: scale(1.3); transition: transform 1.8s var(--ease-expo);
+  filter: saturate(0.8) contrast(1.05);
+}
+.img-reveal.revealed img { transform: scale(1); }
+
+/* ════════════════════════════════════════════════════════════
+   MARQUEE
+   ════════════════════════════════════════════════════════════ */
+.marquee {
+  padding: 1.5rem 0; border-top: 1px solid var(--cream-05);
+  border-bottom: 1px solid var(--cream-05); overflow: hidden;
+}
+.marquee-track { display: flex; white-space: nowrap; animation: slide 40s linear infinite; }
+.marquee-item {
+  font-family: var(--ff-display); font-size: 1rem; font-weight: 300;
+  font-style: italic; color: var(--cream-20); padding: 0 2rem;
+  display: flex; align-items: center; gap: 2rem;
+}
+.marquee-item::after { content: ''; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; }
+@keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ════════════════════════════════════════════════════════════
+   SECTIONS
+   ════════════════════════════════════════════════════════════ */
+.section { padding: clamp(6rem, 14vw, 12rem) clamp(1.5rem, 8vw, 10rem); position: relative; }
+
+.s-tag {
+  font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.5em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.s-tag::before { content: ''; width: 32px; height: 1px; background: var(--gold); }
+
+.s-title {
+  font-family: var(--ff-display); font-size: clamp(2rem, 5vw, 4.2rem);
+  font-weight: 300; line-height: 1.15; letter-spacing: -0.02em;
+}
+.s-title em { font-style: italic; color: var(--gold); font-weight: 400; }
+
+.s-desc { font-size: 0.9rem; font-weight: 300; color: var(--cream-50); max-width: 480px; line-height: 1.85; }
+
+/* Split text for section titles */
+.split-title .char {
+  display: inline-block; opacity: 0; transform: translateY(100%) rotate(5deg);
+}
+
+/* ════════════════════════════════════════════════════════════
+   ABOUT
+   ════════════════════════════════════════════════════════════ */
+#about { background: var(--bg-warm); }
+
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: clamp(3rem, 7vw, 8rem); align-items: center; margin-top: 3.5rem;
+}
+
+.about-images { position: relative; height: 600px; }
+
+.about-img {
+  position: absolute; overflow: hidden; border: 1px solid var(--cream-05);
+}
+.about-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.75) contrast(1.05) brightness(0.9);
+  transition: transform 0.8s var(--ease-expo);
+}
+.about-img:hover img { transform: scale(1.05); }
+
+.about-img-1 { width: 65%; height: 75%; top: 0; left: 0; z-index: 2; }
+.about-img-2 { width: 50%; height: 55%; bottom: 0; right: 0; z-index: 1; }
+
+.about-img-frame {
+  position: absolute; width: 65%; height: 75%; top: 1.5rem; left: 1.5rem;
+  border: 1px solid var(--gold); opacity: 0.15; z-index: 0;
+}
+
+.about-stats {
+  display: flex; gap: 3rem; margin-top: 3rem; padding-top: 2rem;
+  border-top: 1px solid var(--cream-05);
+}
+.stat-num {
+  font-family: var(--ff-display); font-size: 2.8rem; font-weight: 300;
+  color: var(--gold); line-height: 1;
+}
+.stat-label {
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--cream-20); margin-top: 0.4rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   PROCESS
+   ════════════════════════════════════════════════════════════ */
+#process { background: var(--bg); }
+
+.process-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; margin-top: 4rem; background: var(--cream-05);
+}
+
+.process-item {
+  background: var(--bg); padding: clamp(2rem, 4vw, 3.5rem);
+  position: relative; overflow: hidden;
+}
+.process-item::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.8s var(--ease-expo);
+}
+.process-item:hover::before { transform: scaleX(1); }
+
+.process-num {
+  font-family: var(--ff-display); font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 300; color: var(--cream-05); line-height: 1; margin-bottom: 1.5rem;
+}
+
+.process-img {
+  width: 100%; aspect-ratio: 16/10; overflow: hidden; margin-bottom: 1.5rem;
+  position: relative;
+}
+.process-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.6) brightness(0.7) contrast(1.1);
+  transition: transform 0.8s var(--ease-expo), filter 0.8s;
+}
+.process-item:hover .process-img img {
+  transform: scale(1.08);
+  filter: saturate(0.8) brightness(0.8) contrast(1.1);
+}
+
+.process-item h3 {
+  font-family: var(--ff-display); font-size: 1.4rem; font-weight: 400;
+  margin-bottom: 0.75rem;
+}
+.process-item p { font-size: 0.82rem; color: var(--cream-50); line-height: 1.75; }
+
+/* ════════════════════════════════════════════════════════════
+   FEATURED
+   ════════════════════════════════════════════════════════════ */
+#featured {
+  background: var(--bg-warm); min-height: 100vh; display: flex; align-items: center;
+  position: relative; overflow: hidden;
+}
+
+.featured-bg {
+  position: absolute; font-family: var(--ff-display);
+  font-size: clamp(10rem, 25vw, 22rem); font-weight: 300;
+  color: var(--cream-05); white-space: nowrap;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.featured-grid {
+  display: grid; grid-template-columns: 1.3fr 1fr;
+  gap: clamp(3rem, 6vw, 6rem); align-items: center; width: 100%;
+  padding: 0 clamp(1.5rem, 8vw, 10rem);
+}
+
+.featured-visual { position: relative; }
+
+.featured-img-main {
+  width: 100%; aspect-ratio: 3/4; overflow: hidden; position: relative;
+  border: 1px solid var(--cream-05);
+}
+.featured-img-main img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.7) contrast(1.1);
+}
+
+/* Orbiting elements */
+.orbit-ring {
+  position: absolute; border-radius: 50%; border: 1px solid var(--cream-05);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: orbitSpin 20s linear infinite;
+}
+.orbit-ring:nth-child(2) { animation-direction: reverse; animation-duration: 15s; }
+@keyframes orbitSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.orbit-dot {
+  position: absolute; width: 6px; height: 6px; background: var(--gold);
+  border-radius: 50%; top: -3px; left: 50%;
+}
+
+.featured-price {
+  font-family: var(--ff-display); font-size: 2.5rem; color: var(--gold);
+  font-weight: 400; margin: 1.5rem 0;
+}
+
+.featured-tags { display: flex; gap: 1rem; margin: 2rem 0; flex-wrap: wrap; }
+.featured-tag {
+  padding: 0.5rem 1.2rem; border: 1px solid var(--cream-10);
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream-50);
+}
+
+/* ════════════════════════════════════════════════════════════
+   SHOP
+   ════════════════════════════════════════════════════════════ */
+#shop { background: var(--bg); }
+
+.shop-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 2rem; }
+.shop-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.filter-btn {
+  padding: 0.55rem 1.3rem; font-size: 0.6rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--cream-20); border: 1px solid var(--cream-05);
+  transition: all 0.4s var(--ease-expo); font-weight: 400;
+}
+.filter-btn:hover, .filter-btn.active {
+  color: var(--bg); background: var(--gold); border-color: var(--gold);
+}
+
+.shop-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1px; margin-top: 3rem; background: var(--cream-05);
+}
+
+.product-card {
+  background: var(--bg); overflow: hidden; position: relative; cursor: pointer;
+}
+
+.product-card-visual {
+  position: relative; aspect-ratio: 3/4; overflow: hidden;
+}
+.product-card-visual img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.6) brightness(0.75) contrast(1.1);
+  transition: transform 0.8s var(--ease-expo), filter 0.8s;
+}
+.product-card:hover .product-card-visual img {
+  transform: scale(1.08);
+  filter: saturate(0.8) brightness(0.85) contrast(1.1);
+}
+
+.product-card-badge {
+  position: absolute; top: 1rem; left: 1rem; z-index: 2;
+  background: var(--gold); color: var(--bg); padding: 0.25rem 0.7rem;
+  font-size: 0.5rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+}
+
+.product-card-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(transparent 40%, rgba(6,5,4,0.9));
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 1.5rem;
+  opacity: 0; transition: opacity 0.4s;
+}
+.product-card:hover .product-card-overlay { opacity: 1; }
+
+.product-card-overlay button {
+  width: 100%; padding: 0.8rem; background: var(--gold); color: var(--bg);
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  transition: background 0.3s;
+}
+.product-card-overlay button:hover { background: var(--cream); }
+
+.product-card-info { padding: 1.2rem 1.5rem 1.5rem; }
+.product-card-info h3 {
+  font-family: var(--ff-display); font-size: 1.15rem; font-weight: 400;
+}
+.product-card-info .type {
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--cream-20); margin-top: 0.2rem;
+}
+.product-card-info .price-row {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;
+}
+.product-card-info .price {
+  font-family: var(--ff-display); font-size: 1.15rem; color: var(--gold);
+}
+.product-card-info .colors { display: flex; gap: 0.3rem; }
+.color-swatch {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 1px solid var(--cream-10); transition: transform 0.2s var(--ease-spring);
+}
+.color-swatch:hover { transform: scale(1.4); }
+
+/* ════════════════════════════════════════════════════════════
+   GALLERY — fullscreen horizontal
+   ════════════════════════════════════════════════════════════ */
+#gallery { background: var(--bg-warm); overflow: hidden; }
+
+.gallery-track { display: flex; gap: 1rem; padding: 2rem 0; }
+
+.gallery-slide {
+  flex-shrink: 0; width: clamp(300px, 35vw, 450px); aspect-ratio: 3/4;
+  overflow: hidden; position: relative;
+}
+.gallery-slide img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.5) brightness(0.7) contrast(1.1);
+  transition: all 1s var(--ease-expo);
+}
+.gallery-slide:hover img {
+  filter: saturate(0.8) brightness(0.85) contrast(1.1);
+  transform: scale(1.06);
+}
+
+.gallery-slide-info {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem;
+  background: linear-gradient(transparent, rgba(6,5,4,0.85));
+  transform: translateY(100%); transition: transform 0.5s var(--ease-expo);
+}
+.gallery-slide:hover .gallery-slide-info { transform: translateY(0); }
+.gallery-slide-info h4 { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 400; }
+.gallery-slide-info p { font-size: 0.65rem; color: var(--cream-50); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.3rem; }
+
+/* ════════════════════════════════════════════════════════════
+   TIKTOK LIVE
+   ════════════════════════════════════════════════════════════ */
+#live {
+  background: var(--bg); text-align: center; position: relative; overflow: hidden;
+}
+
+/* Animated knit background pattern */
+.live-pattern {
+  position: absolute; inset: 0; opacity: 0.02; pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 30px, var(--gold) 30px, var(--gold) 31px
+  ),
+  repeating-linear-gradient(
+    90deg, transparent, transparent 30px, var(--rose) 30px, var(--rose) 31px
+  );
+}
+
+.live-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 1rem; border: 1px solid rgba(255,0,80,0.3);
+  border-radius: 100px; margin-bottom: 2rem;
+}
+.live-dot {
+  width: 6px; height: 6px; background: #ff0050; border-radius: 50%;
+  animation: livePulse 2s ease infinite;
+}
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.live-badge span {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: #ff6b8a;
+}
+
+.live-title {
+  font-family: var(--ff-display); font-size: clamp(2.5rem, 6vw, 5.5rem);
+  font-weight: 300; line-height: 1.08;
+}
+.live-title em { font-style: italic; color: var(--rose); }
+
+.live-desc { font-size: 0.9rem; color: var(--cream-50); max-width: 520px; margin: 1.5rem auto 3rem; line-height: 1.85; }
+
+.tiktok-btn {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #ff0050, #00f2ea);
+  color: #fff; font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.4s;
+}
+.tiktok-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(255,0,80,0.25); }
+.tiktok-btn svg { width: 18px; height: 18px; }
+
+/* Live images floating */
+.live-images { display: flex; justify-content: center; gap: 1.5rem; margin-top: 4rem; flex-wrap: wrap; }
+.live-img {
+  width: clamp(120px, 15vw, 180px); aspect-ratio: 1; overflow: hidden;
+  border: 1px solid var(--cream-05); position: relative;
+}
+.live-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.5) brightness(0.65);
+  transition: all 0.6s var(--ease-expo);
+}
+.live-img:hover img { filter: saturate(0.8) brightness(0.8); transform: scale(1.1); }
+
+/* ════════════════════════════════════════════════════════════
+   TESTIMONIALS
+   ════════════════════════════════════════════════════════════ */
+#testimonials { background: var(--bg-warm); }
+
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 3rem; background: var(--cream-05); }
+.test-card {
+  background: var(--bg-warm); padding: clamp(2rem, 3vw, 3rem);
+  position: relative;
+}
+.test-card::before {
+  content: '\201C'; font-family: var(--ff-display); font-size: 5rem;
+  color: var(--gold); opacity: 0.1; position: absolute; top: 0.5rem; left: 1.5rem; line-height: 1;
+}
+.test-stars { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.1em; margin-bottom: 1.2rem; }
+.test-text {
+  font-family: var(--ff-display); font-size: 1rem; font-weight: 300;
+  font-style: italic; line-height: 1.75; margin-bottom: 1.5rem;
+}
+.test-author { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cream-20); }
+
+/* ════════════════════════════════════════════════════════════
+   NEWSLETTER
+   ════════════════════════════════════════════════════════════ */
+#newsletter {
+  background: var(--surface); text-align: center;
+  border-top: 1px solid var(--cream-05); border-bottom: 1px solid var(--cream-05);
+}
+
+.nl-form {
+  display: flex; max-width: 480px; margin: 2rem auto 0;
+  border: 1px solid var(--cream-10); overflow: hidden;
+}
+.nl-form input {
+  flex: 1; padding: 1rem 1.5rem; background: transparent; border: none;
+  color: var(--cream); font-family: var(--ff-body); font-size: 0.8rem; outline: none;
+}
+.nl-form input::placeholder { color: var(--cream-20); }
+.nl-form button {
+  padding: 1rem 2rem; background: var(--gold); color: var(--bg);
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
+  transition: background 0.3s;
+}
+.nl-form button:hover { background: var(--cream); }
+
+/* ════════════════════════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════════════════════════ */
+footer { background: var(--bg); padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 8vw, 10rem) 2rem; }
+
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--cream-05); }
+.footer-brand p { font-size: 0.8rem; color: var(--cream-20); line-height: 1.75; max-width: 320px; margin-top: 1rem; }
+.footer-col h4 { font-family: var(--ff-display); font-size: 0.95rem; font-weight: 400; margin-bottom: 1.2rem; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+.footer-col ul a { font-size: 0.75rem; color: var(--cream-20); transition: color 0.3s; }
+.footer-col ul a:hover { color: var(--gold); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.footer-bottom p { font-size: 0.6rem; color: var(--cream-10); letter-spacing: 0.08em; }
+.footer-socials { display: flex; gap: 1.5rem; }
+.footer-socials a { font-size: 0.65rem; color: var(--cream-20); letter-spacing: 0.12em; text-transform: uppercase; transition: color 0.3s; }
+.footer-socials a:hover { color: var(--gold); }
+
+/* ════════════════════════════════════════════════════════════
+   CART DRAWER
+   ════════════════════════════════════════════════════════════ */
+.cart-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.4s; }
+.cart-bg.open { opacity: 1; visibility: visible; }
+.cart-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 90vw);
+  background: var(--surface); z-index: 10000; transform: translateX(100%);
+  transition: transform 0.6s var(--ease-expo); display: flex; flex-direction: column;
+}
+.cart-panel.open { transform: translateX(0); }
+.cart-head { display: flex; justify-content: space-between; align-items: center; padding: 2rem; border-bottom: 1px solid var(--cream-05); }
+.cart-head h3 { font-family: var(--ff-display); font-size: 1.2rem; font-weight: 400; }
+.cart-close { font-size: 1.5rem; color: var(--cream-20); transition: color 0.3s; line-height: 1; }
+.cart-close:hover { color: var(--cream); }
+.cart-body { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+.cart-empty { text-align: center; padding: 3rem 0; color: var(--cream-20); font-size: 0.85rem; font-style: italic; }
+.cart-row { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--cream-05); }
+.cart-thumb { width: 64px; height: 64px; overflow: hidden; flex-shrink: 0; }
+.cart-thumb img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.6) brightness(0.7); }
+.cart-row-info { flex: 1; }
+.cart-row-name { font-family: var(--ff-display); font-size: 0.95rem; }
+.cart-row-price { font-size: 0.8rem; color: var(--gold); margin-top: 0.15rem; }
+.cart-row-rm { font-size: 0.6rem; color: var(--cream-20); margin-top: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.3s; }
+.cart-row-rm:hover { color: var(--rose); }
+.cart-foot { padding: 1.5rem 2rem; border-top: 1px solid var(--cream-05); }
+.cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.cart-total-row span:first-child { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream-20); }
+.cart-total-row span:last-child { font-family: var(--ff-display); font-size: 1.4rem; color: var(--gold); }
+.cart-order-btn { width: 100%; padding: 1rem; background: var(--gold); color: var(--bg); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; transition: background 0.3s; }
+.cart-order-btn:hover { background: var(--cream); }
+
+/* ════════════════════════════════════════════════════════════
+   GRAIN + REVEAL
+   ════════════════════════════════════════════════════════════ */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9990; opacity: 0.03;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
+  background-size: 128px;
+}
+
+.reveal { opacity: 0; transform: translateY(30px); }
+.reveal.vis { opacity: 1; transform: translateY(0); transition: opacity 0.8s var(--ease-expo), transform 0.9s var(--ease-expo); }
+.rd1 { transition-delay: 0.1s !important; }
+.rd2 { transition-delay: 0.2s !important; }
+.rd3 { transition-delay: 0.3s !important; }
+.rd4 { transition-delay: 0.4s !important; }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .about-grid, .featured-grid { grid-template-columns: 1fr; }
+  .process-row { grid-template-columns: 1fr 1fr; }
+  .test-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .about-images { height: 400px; }
+  .featured-visual { max-width: 500px; margin: 0 auto; }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .menu-btn { display: block; }
+  .process-row { grid-template-columns: 1fr; }
+  .shop-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; }
+  .about-stats { flex-direction: column; gap: 1.5rem; }
+  .hero-actions { flex-direction: column; align-items: flex-start; }
+  .hero-float { display: none; }
+  .featured-tags { justify-content: center; }
+  .live-images { gap: 0.75rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- CURSOR -->
+<div class="cursor cursor-dot" id="cDot"></div>
+<div class="cursor cursor-ring" id="cRing"></div>
+<div class="cursor cursor-text" id="cText"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-counter" id="loaderNum">0</div>
+  <div class="loader-label">Učitavanje</div>
+  <div class="loader-line"><div class="loader-line-fill" id="loaderFill"></div></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo">Sanja<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">Priča</a></li>
+    <li><a href="#process">Zanat</a></li>
+    <li><a href="#shop">Prodavnica</a></li>
+    <li><a href="#gallery">Galerija</a></li>
+    <li><a href="#live">Uživo</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-cart-btn" id="openCart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="menu-btn" id="menuBtn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#about">Priča</a>
+  <a href="#process">Zanat</a>
+  <a href="#shop">Prodavnica</a>
+  <a href="#gallery">Galerija</a>
+  <a href="#live">Uživo</a>
+</div>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-overlay"></div>
+
+  <!-- Floating images -->
+  <div class="hero-float hero-float-1 img-reveal">
+    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80" alt="Yarn balls">
+  </div>
+  <div class="hero-float hero-float-2 img-reveal">
+    <img src="https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=300&q=80" alt="Handmade toy">
+  </div>
+  <div class="hero-float hero-float-3 img-reveal">
+    <img src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=300&q=80" alt="Crochet">
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-line"></span>
+      <span>Ručno pletene sa ljubavlju</span>
+    </div>
+    <h1 class="hero-title" id="heroTitle">
+      Unikatne <em>plišane</em> igračke
+    </h1>
+    <p class="hero-body">Svaka igračka je priča ispletena nežnim rukama. Jedinstven poklon koji nosi toplinu domaćeg rada i beskrajnu ljubav.</p>
+    <div class="hero-actions">
+      <a href="#shop" class="mag-btn">
+        <span>Pogledaj kolekciju</span>
+        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a href="#live" class="link-btn">Gledaj uživo <span>→</span></a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Skroluj</span>
+    <div class="scroll-bar"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track">
+    <div class="marquee-item">Ručni rad</div>
+    <div class="marquee-item">Sa ljubavlju</div>
+    <div class="marquee-item">Unikatni komadi</div>
+    <div class="marquee-item">Pletene igračke</div>
+    <div class="marquee-item">Poklon iz srca</div>
+    <div class="marquee-item">Dečija radost</div>
+    <div class="marquee-item">Amigurumi</div>
+    <div class="marquee-item">Ručni rad</div>
+    <div class="marquee-item">Sa ljubavlju</div>
+    <div class="marquee-item">Unikatni komadi</div>
+    <div class="marquee-item">Pletene igračke</div>
+    <div class="marquee-item">Poklon iz srca</div>
+    <div class="marquee-item">Dečija radost</div>
+    <div class="marquee-item">Amigurumi</div>
+  </div>
+</div>
+
+<!-- ════════════════ ABOUT ════════════════ -->
+<section id="about" class="section">
+  <div class="about-grid">
+    <div>
+      <p class="s-tag reveal">Naša priča</p>
+      <h2 class="s-title split-title reveal rd1">Svaki bod nosi <em>ljubav</em> i pažnju</h2>
+      <p class="s-desc reveal rd2">Moje ime je Sanja Krstić. Već godinama pletem unikatne plišane igračke — svaku sa posebnom pričom i dušom. Od mekih medvedića do šarenih zečeva, svaki komad nastaje satima pažljivog rada.</p>
+      <p class="s-desc reveal rd3" style="margin-top:1rem">Svaka igračka je potpuno ručno izrađena — nećete naći dve identične. To je ono što ih čini posebnim.</p>
+      <div class="about-stats reveal rd4">
+        <div><div class="stat-num" data-count="500">0</div><div class="stat-label">Napravljenih igračaka</div></div>
+        <div><div class="stat-num">100%</div><div class="stat-label">Ručni rad</div></div>
+        <div><div class="stat-num">♥</div><div class="stat-label">Sa ljubavlju</div></div>
+      </div>
+    </div>
+    <div class="about-images reveal">
+      <div class="about-img-frame"></div>
+      <div class="about-img about-img-1 img-reveal">
+        <img src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&q=80" alt="Crochet work">
+      </div>
+      <div class="about-img about-img-2 img-reveal">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&q=80" alt="Yarn collection">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ PROCESS ════════════════ -->
+<section id="process" class="section">
+  <p class="s-tag reveal">Proces stvaranja</p>
+  <h2 class="s-title split-title reveal rd1">Zanat koji diše <em>toplinom</em></h2>
+  <div class="process-row">
+    <div class="process-item reveal">
+      <div class="process-num">01</div>
+      <div class="process-img img-reveal">
+        <img src="https://images.unsplash.com/photo-1530519729491-ced356f1dc5f?w=600&q=80" alt="Inspiration">
+      </div>
+      <h3>Inspiracija</h3>
+      <p>Svaka igračka počinje kao ideja — inspirisana prirodom, dečijim osmesima i svetom mašte. Biram boje i oblike koji donose radost.</p>
+    </div>
+    <div class="process-item reveal rd1">
+      <div class="process-num">02</div>
+      <div class="process-img img-reveal">
+        <img src="https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=600&q=80" alt="Knitting">
+      </div>
+      <h3>Pletenje</h3>
+      <p>Nežnim rukama, bod po bod, igračka polako dobija oblik. Koristim najkvalitetniju pređe, bezbednu za najmlađe.</p>
+    </div>
+    <div class="process-item reveal rd2">
+      <div class="process-num">03</div>
+      <div class="process-img img-reveal">
+        <img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&q=80" alt="Final touches">
+      </div>
+      <h3>Finalizacija</h3>
+      <p>Dodajem oči, osmeh i karakter. Svaka igračka prolazi kontrolu kvaliteta i pakuje se sa ljubavlju.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FEATURED ════════════════ -->
+<section id="featured">
+  <div class="featured-bg">Medvedić</div>
+  <div class="featured-grid">
+    <div class="featured-visual reveal">
+      <div class="orbit-ring" style="width:110%;height:110%"><div class="orbit-dot"></div></div>
+      <div class="orbit-ring" style="width:90%;height:90%"><div class="orbit-dot"></div></div>
+      <div class="featured-img-main img-reveal">
+        <img src="https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=700&q=80" alt="Handmade bear">
+      </div>
+    </div>
+    <div>
+      <p class="s-tag reveal">Bestseler</p>
+      <h2 class="s-title reveal rd1" style="font-size:clamp(2.5rem,5vw,4.5rem)">Medvedić <em>Mika</em></h2>
+      <p class="s-desc reveal rd2">Naš najpopularniji pleteni medvedić. Mekan, zagrljiv i napravljen od najfinijeg pamučnog konca. Savršen poklon za svaku priliku.</p>
+      <div class="featured-price reveal rd2">2.500 RSD</div>
+      <div class="featured-tags reveal rd3">
+        <span class="featured-tag">Sigurno za bebe</span>
+        <span class="featured-tag">100% Pamuk</span>
+        <span class="featured-tag">~25cm visine</span>
+      </div>
+      <div style="margin-top:2rem" class="reveal rd4">
+        <button class="mag-btn" onclick="addToCart(0)">
+          <span>Dodaj u korpu</span>
+          <svg class="btn-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SHOP ════════════════ -->
+<section id="shop" class="section">
+  <div class="shop-header">
+    <div>
+      <p class="s-tag reveal">Kolekcija</p>
+      <h2 class="s-title split-title reveal rd1">Izaberite svog <em>ljubimca</em></h2>
+    </div>
+    <div class="shop-filters reveal rd2">
+      <button class="filter-btn active" data-filter="all">Sve</button>
+      <button class="filter-btn" data-filter="animals">Životinje</button>
+      <button class="filter-btn" data-filter="characters">Likovi</button>
+      <button class="filter-btn" data-filter="baby">Za bebe</button>
+      <button class="filter-btn" data-filter="special">Specijalno</button>
+    </div>
+  </div>
+  <div class="shop-grid" id="shopGrid"></div>
+</section>
+
+<!-- ════════════════ GALLERY ════════════════ -->
+<section id="gallery" class="section">
+  <p class="s-tag reveal">Galerija</p>
+  <h2 class="s-title split-title reveal rd1">Iz <em>radionice</em> sa ljubavlju</h2>
+  <div class="gallery-track" id="galleryTrack">
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Medvedić Mika</h4><p>Plišani medved</p></div></div>
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Kolekcija pređe</h4><p>Materijali</p></div></div>
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Proces rada</h4><p>Ručno pletenje</p></div></div>
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Detalji</h4><p>Svaki bod</p></div></div>
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1530519729491-ced356f1dc5f?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Inspiracija</h4><p>Boje i oblici</p></div></div>
+    <div class="gallery-slide"><img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&q=80" alt=""><div class="gallery-slide-info"><h4>Gotov proizvod</h4><p>Spremno za vas</p></div></div>
+  </div>
+</section>
+
+<!-- ════════════════ LIVE ════════════════ -->
+<section id="live" class="section">
+  <div class="live-pattern"></div>
+  <div class="live-badge"><div class="live-dot"></div><span>TikTok Live</span></div>
+  <h2 class="live-title split-title reveal">Gledajte kako<br>nastaje <em>čarolija</em></h2>
+  <p class="live-desc reveal rd1">Pridružite mi se na TikTok-u gde uživo pletem i razgovaram sa vama. Pogledajte ceo proces — od prve petlje do gotove igračke.</p>
+  <a href="https://www.tiktok.com/@sanjakrstic8" target="_blank" class="tiktok-btn reveal rd2">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.48v-7.1a8.16 8.16 0 005.58 2.2V11.3a4.85 4.85 0 01-3.15-1.16V6.69h3.15z"/></svg>
+    <span>@sanjakrstic8</span>
+  </a>
+  <div class="live-images reveal rd3">
+    <div class="live-img"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&q=80" alt=""></div>
+    <div class="live-img"><img src="https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=300&q=80" alt=""></div>
+    <div class="live-img"><img src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=300&q=80" alt=""></div>
+    <div class="live-img"><img src="https://images.unsplash.com/photo-1530519729491-ced356f1dc5f?w=300&q=80" alt=""></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="section">
+  <p class="s-tag reveal">Utisci</p>
+  <h2 class="s-title split-title reveal rd1">Reči naših <em>kupaca</em></h2>
+  <div class="test-grid">
+    <div class="test-card reveal">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"Naručila sam medvedića za ćerkicu — kad ga je videla, odmah ga je zagrlila i nije ga pustila ceo dan. Prelepo je urađen!"</p>
+      <p class="test-author">— Marija, Beograd</p>
+    </div>
+    <div class="test-card reveal rd1">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"Savršen poklon za krštenje. Sanja je ispunila svaki moj zahtev. Igračka je kvalitetna i sigurna za bebe."</p>
+      <p class="test-author">— Ana, Novi Sad</p>
+    </div>
+    <div class="test-card reveal rd2">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"Gledam Sanju na TikTok-u svaki dan — neverovatno je gledati kako od klupka vune nastaje tako lepa igračka."</p>
+      <p class="test-author">— Jelena, Niš</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section id="newsletter" class="section">
+  <p class="s-tag reveal" style="justify-content:center">Budite u toku</p>
+  <h2 class="s-title split-title reveal rd1" style="text-align:center">Prijavite se za <em>novosti</em></h2>
+  <p class="s-desc reveal rd2" style="margin:0 auto;text-align:center">Budite prvi koji će saznati o novim igračkama i specijalnim ponudama.</p>
+  <form class="nl-form reveal rd3" onsubmit="event.preventDefault();this.querySelector('button').textContent='Hvala! ♥'">
+    <input type="email" placeholder="Vaša email adresa" required>
+    <button type="submit">Prijavi se</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="font-size:1.5rem">Sanja<span>.</span></div>
+      <p>Ručno pletene plišane igračke napravljene sa ljubavlju. Svaki komad je unikatan, baš kao i osoba kojoj je namenjen.</p>
+    </div>
+    <div class="footer-col"><h4>Navigacija</h4><ul><li><a href="#about">Priča</a></li><li><a href="#process">Zanat</a></li><li><a href="#shop">Prodavnica</a></li><li><a href="#gallery">Galerija</a></li></ul></div>
+    <div class="footer-col"><h4>Info</h4><ul><li><a href="#">Dostava</a></li><li><a href="#">Povraćaj</a></li><li><a href="#">FAQ</a></li><li><a href="#">Kontakt</a></li></ul></div>
+    <div class="footer-col"><h4>Kontakt</h4><ul><li><a href="#">info@sanjakrstic.com</a></li><li><a href="https://www.tiktok.com/@sanjakrstic8" target="_blank">TikTok</a></li><li><a href="#">Instagram</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Sanja Krstić. Sva prava zadržana.</p>
+    <div class="footer-socials">
+      <a href="https://www.tiktok.com/@sanjakrstic8" target="_blank">TikTok</a>
+      <a href="#">Instagram</a>
+      <a href="#">Facebook</a>
+    </div>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="cart-bg" id="cartBg"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-head"><h3>Vaša korpa</h3><button class="cart-close" id="cartClose">✕</button></div>
+  <div class="cart-body" id="cartBody"><div class="cart-empty">Korpa je prazna</div></div>
+  <div class="cart-foot">
+    <div class="cart-total-row"><span>Ukupno</span><span id="cartTotal">0 RSD</span></div>
+    <button class="cart-order-btn">Naruči</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ════════════════════════════════════════════════════════════ -->
+<script>
+// ─── LENIS SMOOTH SCROLL ───
+const lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+gsap.registerPlugin(ScrollTrigger);
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(time => lenis.raf(time * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// ─── THREE.JS SCENE ───
+(function(){
+  const c = document.getElementById('hero-canvas');
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+  const r = new THREE.WebGLRenderer({canvas:c, antialias:true, alpha:true});
+  r.setSize(innerWidth, innerHeight);
+  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  r.setClearColor(0x000000, 0);
+  cam.position.set(0, 0, 8);
+
+  scene.add(new THREE.AmbientLight(0xf2ece3, 0.25));
+  const wL = new THREE.PointLight(0xc8a45c, 1.5, 20); wL.position.set(5,5,5); scene.add(wL);
+  const rL = new THREE.PointLight(0xc9908f, 0.8, 18); rL.position.set(-5,3,3); scene.add(rL);
+  const cL = new THREE.PointLight(0xa797b8, 0.4, 12); cL.position.set(0,-4,4); scene.add(cL);
+
+  function yarnBall(rad, col, pos) {
+    const g = new THREE.SphereGeometry(rad, 64, 64);
+    const p = g.attributes.position.array;
+    for(let i=0;i<p.length;i+=3){p[i]+=(Math.random()-0.5)*rad*0.07;p[i+1]+=(Math.random()-0.5)*rad*0.07;p[i+2]+=(Math.random()-0.5)*rad*0.07;}
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({color:col,roughness:0.88,metalness:0.02,emissive:col,emissiveIntensity:0.04}));
+    m.position.set(pos.x,pos.y,pos.z); m.castShadow=true; return m;
+  }
+
+  function plush(col, pos, s) {
+    const gr = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({color:col,roughness:0.92,metalness:0,emissive:col,emissiveIntensity:0.03});
+    // Body
+    const bg = new THREE.SphereGeometry(1,48,48);
+    const bp=bg.attributes.position.array;
+    for(let i=0;i<bp.length;i+=3){const n=Math.sin(bp[i]*8)*Math.cos(bp[i+1]*8)*0.02;bp[i]+=n;bp[i+1]+=n;bp[i+2]+=n;}
+    bg.computeVertexNormals();
+    gr.add(new THREE.Mesh(bg,mat));
+    // Head
+    const hg = new THREE.SphereGeometry(0.7,48,48);
+    const hp=hg.attributes.position.array;
+    for(let i=0;i<hp.length;i+=3){const n=Math.sin(hp[i]*10)*Math.cos(hp[i+1]*10)*0.015;hp[i]+=n;hp[i+1]+=n;hp[i+2]+=n;}
+    hg.computeVertexNormals();
+    const hd=new THREE.Mesh(hg,mat);hd.position.y=1.3;gr.add(hd);
+    // Eyes
+    const eM=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.2,metalness:0.3});
+    const eG=new THREE.SphereGeometry(0.1,16,16);
+    const eL=new THREE.Mesh(eG,eM);eL.position.set(-0.22,1.4,0.58);gr.add(eL);
+    const eR=new THREE.Mesh(eG,eM);eR.position.set(0.22,1.4,0.58);gr.add(eR);
+    // Nose
+    gr.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(0.06,12,12),new THREE.MeshStandardMaterial({color:0xc9908f,roughness:0.5})),{position:new THREE.Vector3(0,1.28,0.65)}));
+    // Ears
+    const eg2=new THREE.SphereGeometry(0.25,16,16);eg2.scale(1,1.3,0.5);
+    const el2=new THREE.Mesh(eg2,mat);el2.position.set(-0.42,1.9,0.05);el2.rotation.z=0.3;gr.add(el2);
+    const er2=new THREE.Mesh(eg2.clone(),mat);er2.position.set(0.42,1.9,0.05);er2.rotation.z=-0.3;gr.add(er2);
+    gr.position.set(pos.x,pos.y,pos.z);gr.scale.set(s,s,s);return gr;
+  }
+
+  const objs=[];
+  const p1=plush(0xe8c4a0,{x:2.8,y:-0.3,z:0},0.85);scene.add(p1);objs.push({m:p1,fs:0.4,fa:0.3,rs:0.15,ph:0});
+  const p2=plush(0xc9908f,{x:-3.2,y:0.8,z:-2},0.55);scene.add(p2);objs.push({m:p2,fs:0.55,fa:0.22,rs:-0.2,ph:1.5});
+
+  [[0.5,0xc8a45c,{x:-1.5,y:-1.8,z:1}],[0.35,0xa797b8,{x:4,y:1.5,z:-1}],[0.4,0x8fa87a,{x:-4.5,y:-1,z:-1.5}],[0.28,0xc9908f,{x:1,y:2.5,z:-2}],[0.3,0xdbb896,{x:3.5,y:-2.5,z:-0.5}]].forEach((d,i)=>{
+    const b=yarnBall(d[0],d[1],d[2]);scene.add(b);
+    objs.push({m:b,fs:0.5+i*0.08,fa:0.18+i*0.02,rs:(i%2?-1:1)*0.3,ph:i*1.1});
+  });
+
+  // Torus rings
+  [[0.6,0.12,0xe2cb8b,{x:-2,y:2,z:-1}],[0.4,0.08,0xc9908f,{x:3.5,y:-2,z:0.5}]].forEach((d,i)=>{
+    const g=new THREE.TorusGeometry(d[0],d[1],24,64);
+    const p=g.attributes.position.array;
+    for(let j=0;j<p.length;j+=3){p[j]+=(Math.random()-0.5)*d[1]*0.15;p[j+1]+=(Math.random()-0.5)*d[1]*0.15;}
+    g.computeVertexNormals();
+    const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:d[2],roughness:0.85,emissive:d[2],emissiveIntensity:0.03}));
+    m.position.set(d[3].x,d[3].y,d[3].z);scene.add(m);
+    objs.push({m,fs:0.45+i*0.1,fa:0.15,rs:(i%2?-1:1)*0.4,ph:i*1.5+1});
+  });
+
+  // Crochet hook 3D
+  const hookG=new THREE.Group();
+  const hMat=new THREE.MeshStandardMaterial({color:0xe2cb8b,roughness:0.35,metalness:0.35});
+  hookG.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,2,16),hMat),{rotation:{x:0,y:0,z:Math.PI/4}}));
+  const tG=new THREE.TorusGeometry(0.07,0.025,12,24,Math.PI);
+  const tM=new THREE.Mesh(tG,hMat);tM.position.set(0.72,0.72,0);tM.rotation.z=-Math.PI/4;hookG.add(tM);
+  hookG.position.set(-0.8,2.2,-0.8);hookG.scale.set(1.1,1.1,1.1);scene.add(hookG);
+  objs.push({m:hookG,fs:0.35,fa:0.12,rs:0.25,ph:3.2});
+
+  // Particles
+  const pG=new THREE.BufferGeometry();const pP=new Float32Array(400*3);
+  for(let i=0;i<400;i++){pP[i*3]=(Math.random()-0.5)*22;pP[i*3+1]=(Math.random()-0.5)*16;pP[i*3+2]=(Math.random()-0.5)*10-3;}
+  pG.setAttribute('position',new THREE.BufferAttribute(pP,3));
+  const pts=new THREE.Points(pG,new THREE.PointsMaterial({color:0xc8a45c,size:0.02,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending}));
+  scene.add(pts);
+
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-0.5)*2;my=-(e.clientY/innerHeight-0.5)*2;});
+  objs.forEach(o=>{o.iy=o.m.position.y;o.ix=o.m.position.x;});
+
+  let t=0;
+  (function anim(){
+    requestAnimationFrame(anim);t+=0.008;
+    objs.forEach(o=>{
+      o.m.position.y=o.iy+Math.sin(t*o.fs+o.ph)*o.fa;
+      o.m.position.x=o.ix+Math.sin(t*o.fs*0.5+o.ph)*o.fa*0.3;
+      o.m.rotation.y+=o.rs*0.004;o.m.rotation.x+=o.rs*0.0015;
+    });
+    cam.position.x+=(mx*0.4-cam.position.x)*0.015;
+    cam.position.y+=(my*0.25-cam.position.y)*0.015;
+    cam.lookAt(0,0,0);
+    pts.rotation.y+=0.0002;pts.rotation.x+=0.0001;
+    wL.position.x=5+mx*2;wL.position.y=5+my*2;
+    r.render(scene,cam);
+  })();
+
+  addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});
+})();
+
+// ─── LOADER ───
+(function(){
+  let p=0;const num=document.getElementById('loaderNum'),fill=document.getElementById('loaderFill');
+  const iv=setInterval(()=>{
+    p+=Math.random()*12+3;if(p>100)p=100;
+    num.textContent=Math.floor(p);fill.style.height=p+'%';
+    if(p>=100){clearInterval(iv);setTimeout(()=>{
+      gsap.to('#loader',{opacity:0,duration:0.8,ease:'power2.inOut',onComplete(){document.getElementById('loader').classList.add('done');heroAnim();}});
+    },300);}
+  },120);
+})();
+
+// ─── HERO ANIMATION (Jitter-style) ───
+function heroAnim(){
+  // Split title into words
+  const title=document.getElementById('heroTitle');
+  const html=title.innerHTML;
+  title.innerHTML=html.replace(/(\S+)/g,'<span class="word"><span class="word-inner">$1</span></span>');
+
+  gsap.set('.hero-eyebrow span:last-child',{y:20,opacity:0});
+  gsap.set('.hero-eyebrow-line',{scaleX:0,transformOrigin:'left'});
+  gsap.set('.hero-body',{y:30,opacity:0});
+  gsap.set('.hero-actions',{y:30,opacity:0});
+  gsap.set('.hero-scroll',{opacity:0});
+
+  const tl=gsap.timeline({defaults:{ease:'power4.out'}});
+  tl.to('.hero-eyebrow-line',{scaleX:1,duration:0.8},0.1)
+    .to('.hero-eyebrow span:last-child',{y:0,opacity:1,duration:0.7},0.2)
+    .to('.word-inner',{y:0,duration:1.2,stagger:0.06},0.3)
+    .to('.hero-body',{y:0,opacity:1,duration:0.8},0.7)
+    .to('.hero-actions',{y:0,opacity:1,duration:0.8},0.9)
+    .to('.hero-scroll',{opacity:0.5,duration:1},1.3);
+
+  // Float hero images
+  gsap.utils.toArray('.hero-float').forEach((el,i)=>{
+    gsap.to(el,{opacity:1,duration:1,delay:0.8+i*0.15});
+    el.querySelector('.img-reveal') && el.classList.add('revealed');
+    gsap.to(el,{y:`${(i%2?-1:1)*12}px`,duration:3+i*0.6,repeat:-1,yoyo:true,ease:'sine.inOut',delay:i*0.4});
+  });
+  document.querySelectorAll('.hero-float.img-reveal').forEach(el=>el.classList.add('revealed'));
+}
+
+// ─── CUSTOM CURSOR ───
+(function(){
+  const d=document.getElementById('cDot'),rng=document.getElementById('cRing'),txt=document.getElementById('cText');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;d.style.left=(mx-3)+'px';d.style.top=(my-3)+'px';});
+  (function loop(){rx+=(mx-22-rx)*0.1;ry+=(my-22-ry)*0.1;rng.style.left=rx+'px';rng.style.top=ry+'px';txt.style.left=(mx+20)+'px';txt.style.top=(my-8)+'px';requestAnimationFrame(loop)})();
+
+  document.querySelectorAll('a,button,.product-card,.filter-btn,.mag-btn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>rng.classList.add('active'));
+    el.addEventListener('mouseleave',()=>{rng.classList.remove('active');txt.classList.remove('visible');});
+  });
+  document.querySelectorAll('.product-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{txt.textContent='Pogledaj';txt.classList.add('visible');});
+    el.addEventListener('mouseleave',()=>txt.classList.remove('visible'));
+  });
+  document.querySelectorAll('.gallery-slide').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{txt.textContent='Galerija';txt.classList.add('visible');});
+    el.addEventListener('mouseleave',()=>txt.classList.remove('visible'));
+  });
+})();
+
+// ─── SCROLL REVEAL ───
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');
+  // char anim for split-title
+  if(e.target.classList.contains('split-title'))e.target.querySelectorAll('.char').forEach(c=>{c.style.opacity=1;c.style.transform='none';});
+  // img reveal
+  if(e.target.classList.contains('img-reveal'))e.target.classList.add('revealed');
+}});},{threshold:0.12});
+document.querySelectorAll('.reveal,.split-title,.img-reveal,.process-item').forEach(el=>obs.observe(el));
+
+// Split titles into chars
+document.querySelectorAll('.split-title').forEach(el=>{
+  const h=el.innerHTML;let out='',inTag=false,ci=0;
+  for(let i=0;i<h.length;i++){
+    if(h[i]==='<'){inTag=true;out+=h[i];continue;}
+    if(h[i]==='>'){inTag=false;out+=h[i];continue;}
+    if(inTag){out+=h[i];continue;}
+    if(h[i]===' '){out+=' ';continue;}
+    out+=`<span class="char" style="display:inline-block;opacity:0;transform:translateY(100%) rotate(5deg);transition:opacity 0.5s ${ci*0.02}s,transform 0.6s var(--ease-expo) ${ci*0.02}s">${h[i]}</span>`;ci++;
+  }
+  el.innerHTML=out;
+});
+
+// Counter animation
+document.querySelectorAll('[data-count]').forEach(el=>{
+  const target=parseInt(el.dataset.count);
+  const cObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){let cur=0;const step=target/50;
+    const iv=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(iv);}el.textContent=Math.floor(cur);},25);cObs.unobserve(el);}});},{threshold:0.5});
+  cObs.observe(el);
+});
+
+// ─── NAV ───
+addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+const menuBtn=document.getElementById('menuBtn'),mNav=document.getElementById('mobileNav');
+menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('open');mNav.classList.toggle('open');});
+mNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menuBtn.classList.remove('open');mNav.classList.remove('open');}));
+
+// ─── GALLERY HORIZONTAL SCROLL ───
+gsap.to('#galleryTrack',{
+  x:()=>-(document.getElementById('galleryTrack').scrollWidth - innerWidth + 100),
+  ease:'none',
+  scrollTrigger:{trigger:'#gallery',start:'top top',end:()=>'+='+(document.getElementById('galleryTrack').scrollWidth),pin:true,scrub:1,invalidateOnRefresh:true}
+});
+
+// Featured parallax
+gsap.to('.featured-bg',{x:'-15%',ease:'none',scrollTrigger:{trigger:'#featured',start:'top bottom',end:'bottom top',scrub:true}});
+
+// Image parallax on scroll
+gsap.utils.toArray('.about-img img, .process-img img, .featured-img-main img').forEach(img=>{
+  gsap.to(img,{y:'-15%',ease:'none',scrollTrigger:{trigger:img.parentElement,start:'top bottom',end:'bottom top',scrub:true}});
+});
+
+// ─── PRODUCTS ───
+const products=[
+  {name:'Medvedić Mika',type:'Plišani medved',price:'2.500',img:'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=500&q=80',badge:'Bestseler',filter:'animals',colors:['#e8c4a0','#8b6f47','#c9908f']},
+  {name:'Zeka Luna',type:'Plišani zec',price:'2.800',img:'https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=500&q=80',badge:null,filter:'animals',colors:['#f2ece3','#c9908f','#a797b8']},
+  {name:'Lisica Runa',type:'Plišana lisica',price:'3.200',img:'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&q=80',badge:'Novo',filter:'animals',colors:['#c8a45c','#7a4f4f','#e2cb8b']},
+  {name:'Mačka Mila',type:'Plišana mačka',price:'2.200',img:'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=500&q=80',badge:null,filter:'animals',colors:['#a3a3a3','#f2ece3','#1a1a1a']},
+  {name:'Princeza Lara',type:'Pletena lutka',price:'3.500',img:'https://images.unsplash.com/photo-1530519729491-ced356f1dc5f?w=500&q=80',badge:'Limitirano',filter:'characters',colors:['#c9908f','#c8a45c','#a797b8']},
+  {name:'Jednorožac Zvezda',type:'Magični jednorožac',price:'3.800',img:'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&q=80',badge:'Novo',filter:'special',colors:['#f2ece3','#a797b8','#c9908f']},
+  {name:'Zvečka Oblačić',type:'Zvečka za bebe',price:'1.500',img:'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&q=80',badge:'Za bebe',filter:'baby',colors:['#f2ece3','#b8d4e8','#c9908f']},
+  {name:'Sova Tara',type:'Plišana sova',price:'2.800',img:'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=500&q=80',badge:null,filter:'animals',colors:['#8b6f47','#c8a45c','#8fa87a']},
+  {name:'Set za bebe',type:'Komplet zvečki',price:'4.500',img:'https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=500&q=80',badge:'Specijalno',filter:'special',colors:['#f2ece3','#c9908f','#c8a45c']},
+  {name:'Kuče Laki',type:'Plišano kuče',price:'2.600',img:'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=500&q=80',badge:null,filter:'animals',colors:['#e8c4a0','#8b6f47','#1a1a1a']},
+  {name:'Gusjenica Dunja',type:'Senzorna igračka',price:'1.800',img:'https://images.unsplash.com/photo-1530519729491-ced356f1dc5f?w=500&q=80',badge:'Za bebe',filter:'baby',colors:['#8fa87a','#c8a45c','#c9908f']},
+  {name:'Mali Robot',type:'Pleteni lik',price:'2.000',img:'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&q=80',badge:null,filter:'characters',colors:['#7a9eb8','#8fa87a','#c8a45c']},
+];
+
+const grid=document.getElementById('shopGrid');
+function render(f){
+  const list=f==='all'?products:products.filter(p=>p.filter===f);
+  grid.innerHTML='';
+  list.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='product-card';d.style.opacity='0';d.style.transform='translateY(20px)';
+    d.innerHTML=`<div class="product-card-visual">
+      <img src="${p.img}" alt="${p.name}" loading="lazy">
+      ${p.badge?`<div class="product-card-badge">${p.badge}</div>`:''}
+      <div class="product-card-overlay"><button onclick="event.stopPropagation();addToCart(${products.indexOf(p)})">Dodaj u korpu</button></div>
+    </div>
+    <div class="product-card-info">
+      <h3>${p.name}</h3>
+      <p class="type">${p.type}</p>
+      <div class="price-row">
+        <span class="price">${p.price} RSD</span>
+        <div class="colors">${p.colors.map(c=>`<div class="color-swatch" style="background:${c}"></div>`).join('')}</div>
+      </div>
+    </div>`;
+    grid.appendChild(d);
+    setTimeout(()=>{d.style.transition='opacity 0.6s var(--ease-expo), transform 0.7s var(--ease-expo)';d.style.opacity='1';d.style.transform='none';},50*i);
+  });
+}
+render('all');
+document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');render(b.dataset.filter);
+}));
+
+// ─── CART ───
+let cart=[];
+function addToCart(i){cart.push(products[i]);upCart();openCart();}
+function rmCart(i){cart.splice(i,1);upCart();}
+function upCart(){
+  document.getElementById('cartCount').textContent=cart.length;
+  const b=document.getElementById('cartBody');
+  b.innerHTML=cart.length?cart.map((it,i)=>`<div class="cart-row">
+    <div class="cart-thumb"><img src="${it.img}" alt=""></div>
+    <div class="cart-row-info"><p class="cart-row-name">${it.name}</p><p class="cart-row-price">${it.price} RSD</p><button class="cart-row-rm" onclick="rmCart(${i})">Ukloni</button></div>
+  </div>`).join(''):'<div class="cart-empty">Korpa je prazna</div>';
+  document.getElementById('cartTotal').textContent=cart.reduce((s,it)=>s+parseInt(it.price.replace(/\./g,'')),0).toLocaleString('sr-RS')+' RSD';
+}
+function openCart(){document.getElementById('cartBg').classList.add('open');document.getElementById('cartPanel').classList.add('open');}
+function closeCart(){document.getElementById('cartBg').classList.remove('open');document.getElementById('cartPanel').classList.remove('open');}
+document.getElementById('openCart').addEventListener('click',openCart);
+document.getElementById('cartClose').addEventListener('click',closeCart);
+document.getElementById('cartBg').addEventListener('click',closeCart);
+
+// Smooth anchors
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',function(e){
+  e.preventDefault();const t=document.querySelector(this.getAttribute('href'));if(t)lenis.scrollTo(t);
+}));
+</script>
+</body>
+</html>

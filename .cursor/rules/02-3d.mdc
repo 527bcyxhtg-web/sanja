@@ -1,0 +1,84 @@
+---
+description: React Three Fiber, Three.js, and Drei patterns for this project
+globs: ["src/components/3d/**", "src/**/*.tsx"]
+alwaysApply: false
+---
+
+# 3D System — React Three Fiber + Drei
+
+## Import rule: ALWAYS dynamic, NEVER SSR
+```tsx
+import dynamic from "next/dynamic";
+
+const MyCanvas = dynamic(() => import("@/components/3d/MyCanvas"), {
+  ssr: false,
+  loading: () => <div className={styles.canvasPlaceholder} />,
+});
+```
+
+## Standard Canvas setup
+```tsx
+import { Canvas } from "@react-three/fiber";
+import { Float, Environment, ContactShadows } from "@react-three/drei";
+
+<Canvas
+  camera={{ position: [0, 0, 5], fov: 45 }}
+  dpr={[1, 1.5]}          // cap pixel ratio for perf
+  gl={{ antialias: true, alpha: true }}
+  style={{ background: "transparent" }}
+>
+  <ambientLight intensity={0.4} />
+  <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
+  <Float speed={1.4} rotationIntensity={0.4} floatIntensity={0.6}>
+    <MyMesh />
+  </Float>
+  <Environment preset="studio" />
+</Canvas>
+```
+
+## Material system (from `crochetMaterials.ts`)
+- **Crochet material:** matte, slightly rough — use for toy body
+- **Accent material:** mid-gloss — for accessories
+- **Gloss material:** high specular — for eyes/buttons
+Always import from `@/components/3d/crochetMaterials` — don't duplicate.
+
+## Interaction patterns
+```tsx
+import { useFrame, ThreeEvent } from "@react-three/fiber";
+import { useRef, useState } from "react";
+
+// Hover rotation
+const meshRef = useRef<THREE.Mesh>(null);
+const [hovered, setHovered] = useState(false);
+useFrame((_, delta) => {
+  if (!meshRef.current) return;
+  meshRef.current.rotation.y += delta * (hovered ? 0.8 : 0.2);
+});
+```
+
+## Lazy load canvas (IntersectionObserver)
+```tsx
+const [show, setShow] = useState(false);
+const ref = useRef<HTMLDivElement>(null);
+useEffect(() => {
+  const obs = new IntersectionObserver(([e]) => e.isIntersecting && setShow(true), { rootMargin: "200px" });
+  if (ref.current) obs.observe(ref.current);
+  return () => obs.disconnect();
+}, []);
+return <div ref={ref}>{show && <MyDynamicCanvas />}</div>;
+```
+
+## Performance rules
+- `dpr={[1, 1.5]}` — never exceed 2× on mobile
+- Dispose geometries and materials on unmount: `useEffect(() => () => geo.dispose(), [])`
+- Use `<Suspense fallback={null}>` around heavy R3F scenes
+- Merge geometries when rendering many identical objects
+
+## Existing 3D components
+- `CrochetBear`, `CrochetBunny`, `CrochetCat`, `CrochetOwl`, `CrochetPuppy`, `CrochetElephant`
+- `HandwovenSoulsStage3D` — full story stage scene
+- `ProductCrochetThumb3D` — per-card canvas
+- Morph types in `crochetMorphTypes.ts`
+
+## Reduced motion fallback
+If `prefers-reduced-motion`, render `<CrochetProductIllustration />` (2D SVG/static) instead of Canvas.

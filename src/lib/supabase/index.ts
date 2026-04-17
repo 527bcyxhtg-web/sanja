@@ -1,0 +1,1 @@
+export { getBrowserSupabase } from "./client";

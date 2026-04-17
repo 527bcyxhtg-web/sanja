@@ -1,0 +1,55 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.motif {
+  position: absolute;
+  top: -12%;
+  border-radius: 50%;
+  opacity: 0.35;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(232, 213, 163, 0.55) 0%,
+    rgba(201, 169, 110, 0.2) 45%,
+    transparent 70%
+  );
+  box-shadow: 0 0 12px rgba(201, 169, 110, 0.15);
+  animation-name: motifFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes motifFall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.4;
+  }
+  92% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(var(--drift, 0px), 120vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .motif:nth-child(n + 7) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motif {
+    animation: none;
+    opacity: 0;
+    display: none;
+  }
+}

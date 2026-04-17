@@ -1,0 +1,66 @@
+.stripEmbedded {
+  margin-top: 0;
+}
+
+.strip {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 18px;
+  margin-top: 48px;
+  padding: 24px 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 110, 0.25) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.strip::-webkit-scrollbar {
+  height: 3px;
+}
+
+.strip::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.25);
+  border-radius: 2px;
+}
+
+.thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(140px, 34vw);
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(
+    ellipse 92% 95% at 50% 48%,
+    black 50%,
+    transparent 96%
+  );
+  mask-image: radial-gradient(
+    ellipse 92% 95% at 50% 48%,
+    black 50%,
+    transparent 96%
+  );
+  transition: transform 0.55s var(--ease-out-expo);
+}
+
+.thumb:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+.img {
+  object-fit: cover;
+  filter: brightness(0.88) contrast(1.06) saturate(0.9);
+}
+
+@media (max-width: 600px) {
+  .strip {
+    margin-top: 36px;
+    padding: 16px 8px;
+    gap: 12px;
+  }
+
+  .thumb {
+    width: min(110px, 38vw);
+  }
+}

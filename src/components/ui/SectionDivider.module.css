@@ -1,0 +1,126 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.wrap::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.06) 18%,
+    rgba(201, 169, 110, 0.12) 50%,
+    rgba(201, 169, 110, 0.06) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.5vw, 20px);
+  width: min(420px, 88vw);
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  max-width: 140px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.35) 40%,
+    rgba(232, 213, 163, 0.55) 50%,
+    rgba(201, 169, 110, 0.35) 60%,
+    transparent
+  );
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.lineLeft {
+  transform-origin: right center;
+}
+
+.lineRight {
+  transform-origin: left center;
+}
+
+.glyph {
+  flex-shrink: 0;
+  color: var(--gold);
+  opacity: 0;
+  width: min(300px, 72vw);
+  height: 22px;
+  will-change: opacity, transform;
+  filter: drop-shadow(0 0 12px rgba(201, 169, 110, 0.15));
+}
+
+.chapter {
+  font-size: 8px;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.45);
+  margin-bottom: -2px;
+}
+
+.ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 2px;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.ornIcon {
+  display: flex;
+  width: 14px;
+  height: 14px;
+  opacity: 0.72;
+  filter: drop-shadow(0 0 8px rgba(201, 169, 110, 0.25));
+}
+
+.ornIcon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ornament {
+    opacity: 0.55;
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .glyph {
+    width: min(220px, 78vw);
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    transform: scaleX(1);
+  }
+  .glyph {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint/v0.40.0/schema/markdownlint-config-schema.json",
+  "default": true,
+  // Stricter defaults for docs, CLAUDE.md, README. `.cursor/rules/.markdownlint.jsonc` relaxes Cursor rule files.
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false
+  }
+}

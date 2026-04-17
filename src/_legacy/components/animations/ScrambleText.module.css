@@ -1,0 +1,5 @@
+.scrambleText {
+  font-family: "Courier New", monospace;
+  display: inline-block;
+  white-space: pre;
+}

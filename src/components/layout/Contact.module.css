@@ -1,0 +1,129 @@
+.section {
+  position: relative;
+  z-index: 2;
+  padding: clamp(72px, 10vw, 96px) clamp(24px, 4vw, 56px);
+  background: linear-gradient(180deg, rgba(8, 4, 7, 0.2) 0%, rgba(20, 8, 15, 0.5) 100%);
+  border-top: 1px solid rgba(201, 169, 110, 0.12);
+  overflow: hidden;
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  bottom: -15%;
+  left: -8%;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 94, 122, 0.04) 0%, transparent 70%);
+  animation: contactOrb 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes contactOrb {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(1.15) translate(20px, -20px); opacity: 0.5; }
+}
+.inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.info { display: flex; flex-direction: column; }
+.desc {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--mist);
+  margin-bottom: 40px;
+}
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detailLabel {
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.detailValue {
+  font-size: 14px;
+  color: var(--cream);
+}
+
+.visual {
+  margin-top: 36px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.floatWrap {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: visible;
+}
+
+.visualImg {
+  object-fit: cover;
+  filter: brightness(0.88) contrast(1.06) saturate(0.92);
+  transition: transform 1s var(--ease-out-expo);
+}
+
+.floatWrap:hover .visualImg {
+  transform: scale(1.03);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.label {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.input,
+.textarea {
+  padding: 14px 18px;
+  background: rgba(245, 240, 235, 0.04);
+  border: 1px solid rgba(201,169,110,0.15);
+  color: var(--cream);
+  font-size: 14px;
+  font-family: var(--font-body);
+  transition: border-color 0.3s;
+}
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(212, 197, 208, 0.4);
+}
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+@media (max-width: 900px) {
+  .section { padding: 64px 24px; }
+  .section::before { display: none; }
+  .inner { grid-template-columns: 1fr; gap: 50px; }
+}

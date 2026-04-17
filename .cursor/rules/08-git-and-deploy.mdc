@@ -1,0 +1,99 @@
+---
+description: Git workflow, deployment, and environment setup
+alwaysApply: false
+---
+
+# Git & Deploy
+
+## Branch strategy
+- `main` — production (auto-deploys to Cloudflare Pages)
+- `dev` — staging / integration
+- `feat/xxx` — feature branches, PR into `dev`
+- `fix/xxx` — hotfix branches
+
+## Commit message format (Conventional Commits)
+```
+feat(hero): add parallax clip-path reveal on scroll
+fix(3d): dispose geometry on canvas unmount
+perf(images): convert PNG to WebP for gallery section
+refactor(gsap): extract tilt animation into gsapUtils
+style(tokens): adjust --gold2 lightness by +5%
+```
+
+## Pre-commit checklist (run before every commit)
+```bash
+npm run lint          # zero warnings, zero errors
+npm run typecheck     # zero TS errors
+npm run build         # must complete without errors
+```
+
+## Deploy to Cloudflare Pages
+```bash
+npm run pages:deploy
+# = npm run build && wrangler pages deploy out
+```
+
+## Environment variables
+Required in `.env.local` (never commit this file):
+```
+NEXT_PUBLIC_SITE_URL=https://sanja-krstic.com
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+```
+On Cloudflare Pages: add these under **Settings → Environment variables**.
+
+## .gitignore (already set, do not remove)
+- `.env.local`, `.env`
+- `.next/`, `out/`
+- `node_modules/`
+- `.DS_Store`
+
+## Post-deploy verification
+1. Open production URL in incognito
+2. Check: hero video loads, 3D canvas renders, smooth scroll works
+3. Run Lighthouse on production (not localhost) for accurate CWV
+4. Check mobile: cursor hidden, touch interactions smooth, no horizontal scroll
+
+---
+
+## Postavljanje: Cloudflare Pages (besplatno) + Supabase (besplatni tier)
+
+Repo već radi **statički export** (`next.config.js` → `output: 'export'`), **Wrangler** (`wrangler.jsonc` → `out/`) i **GitHub Actions** (`.github/workflows/cloudflare-pages.yml`) koji na push u `main` gradi `sanja-plush` i šalje ga na **Cloudflare Pages** projekt imena `sanja-plush`. Frontend koristi **Supabase** samo ako su postavljeni `NEXT_PUBLIC_SUPABASE_*` (inče stranica radi i bez baze).
+
+### 1) Supabase (besplatno)
+1. [supabase.com](https://supabase.com) → novi projekt (Free tier).
+2. **Project Settings → API**: kopiraj **Project URL** i **anon public** ključ.
+3. **Authentication → URL Configuration**:
+   - **Site URL**: tvoja produkcijska adresa, npr. `https://tvoj-projekt.pages.dev` ili vlastita domena.
+   - **Redirect URLs**: dodaj `https://tvoj-projekt.pages.dev/**`, `http://localhost:3000/**`.
+
+### 2) Cloudflare Pages (besplatno)
+1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → ako koristiš isključivo GitHub Actions deploy, dovoljno je imati Cloudflare račun; prvi deploy iz Actions obično stvori ili poveže projekt `sanja-plush` (ime mora odgovarati workflowu).
+2. Nakon prvog uspješnog deploya kopiraj ***.pages.dev** URL i stavi ga u `NEXT_PUBLIC_SITE_URL` (GitHub Variables + Supabase Site URL).
+
+### 3) GitHub — Secrets i varijable (za CI deploy)
+
+U repozitoriju: Settings → Secrets and variables → Actions.
+
+| Tip | Ime | Sadržaj |
+|-----|-----|--------|
+| Secret | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → template *Edit Cloudflare Workers* (uključi Pages) |
+| Secret | `CLOUDFLARE_ACCOUNT_ID` | Workers & Pages → desno **Account ID** |
+| Secret | `NEXT_PUBLIC_SUPABASE_URL` | npr. `https://xxxx.supabase.co` |
+| Secret | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon ključ iz Supabase |
+| Variable | `NEXT_PUBLIC_SITE_URL` | puni HTTPS URL produkcije (npr. `https://sanja-plush.pages.dev`) |
+
+Push u `main` s promjenama u `sanja-plush/**` pokreće workflow **Deploy to Cloudflare Pages**.
+
+### 4) Ručni deploy s računala
+```bash
+cd sanja-plush
+npm ci
+npm run build   # generira ./out
+npx wrangler login
+npm run pages:deploy
+```
+
+### Alternative backendu (također free/low-cost)
+- **Neon**, **Turso**, **PlanetScale** — za Postgres/SQL; trebale bi zamjene u kodu umjesto `@supabase/supabase-js`.
+- Za ovaj projekt **Supabase** je već ugrađen (`getBrowserSupabase`, `SupabaseProvider`); najmanje trenja je ostati na Supabase Free.

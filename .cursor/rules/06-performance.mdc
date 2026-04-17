@@ -1,0 +1,85 @@
+---
+description: Performance, bundle size, and Core Web Vitals rules
+globs: ["src/**/*.tsx", "next.config.js"]
+alwaysApply: false
+---
+
+# Performance Rules
+
+## Image optimisation
+```tsx
+import Image from "next/image";
+
+// Always use next/image for layout images
+<Image
+  src="/toys/bear.webp"
+  alt="Handmade crochet bear toy"
+  width={600}
+  height={600}
+  priority={isAboveFold}    // true only for hero/LCP image
+  loading={isAboveFold ? "eager" : "lazy"}
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+/>
+```
+
+## Video (hero background)
+```tsx
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="metadata"           // not "auto"
+  aria-hidden="true"
+>
+  <source src="/video/hero-ambient.webm" type="video/webm" />
+  <source src="/video/hero-ambient.mp4" type="video/mp4" />
+</video>
+```
+
+## Dynamic imports
+```tsx
+// All heavy components must be lazy
+const HandwovenSoulsStage3D = dynamic(
+  () => import("@/components/3d/HandwovenSoulsStage3D"),
+  { ssr: false, loading: () => <div className={styles.stage3dPlaceholder} /> }
+);
+
+// Use IntersectionObserver to defer canvas mount until near-viewport
+```
+
+## Font loading (already configured in layout.tsx)
+- `display: "swap"` on all Google Fonts
+- Preload only the display font (Cormorant Garamond 300/400/500)
+- Body font (Inter) can load after paint
+
+## CSS performance
+- `will-change: transform` — only on elements actively being GSAP-animated
+- Remove `will-change` after animation: `el.style.willChange = "auto"`
+- Avoid `backdrop-filter` on >3 overlapping elements (GPU overdraw)
+- Use `contain: layout` on sections that don't affect each other
+
+## JavaScript bundle targets
+- Main bundle (page load): < 150kb gzipped
+- React + Next.js runtime: ~90kb (fixed)
+- GSAP: ~25kb gzipped
+- Lenis: ~5kb gzipped
+- Three.js + R3F: loaded only when canvas enters viewport (~250kb — acceptable as async)
+
+## Core Web Vitals checklist
+- **LCP**: Hero image/video must have `priority` + `preload`; use `<link rel="preload">` for hero font
+- **CLS**: All images need explicit `width` + `height`; avoid inserting DOM above existing content; use CSS `aspect-ratio`
+- **INP**: Event handlers must complete < 200ms; heavy computation → `requestIdleCallback` or Worker
+- **TTFB**: Static export on Cloudflare Pages CDN → inherently fast; no SSR wait
+
+## Monitoring
+Check `.lighthouse/` baselines before and after major changes:
+```bash
+npx lighthouse http://localhost:3000 --output=json --output-path=.lighthouse/latest.json
+```
+
+## Bundle analysis
+```bash
+ANALYZE=true npm run build   # if next-bundle-analyzer is configured
+# Or manually inspect: ls -la .next/static/chunks/
+```

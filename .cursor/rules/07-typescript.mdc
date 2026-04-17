@@ -1,0 +1,115 @@
+---
+description: TypeScript patterns, strict mode rules, and common types for this project
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: false
+---
+
+# TypeScript — Strict Mode Conventions
+
+## tsconfig highlights
+```json
+{
+  "strict": true,
+  "noUnusedLocals": true,
+  "noUnusedParameters": true,
+  "exactOptionalPropertyTypes": true
+}
+```
+
+## Common types in this project
+
+### Component props
+```ts
+interface SectionProps {
+  className?: string;
+  id?: string;
+}
+```
+
+### GSAP refs
+```ts
+const sectionRef = useRef<HTMLElement>(null);
+const headingRef = useRef<HTMLHeadingElement>(null);
+const cardRefs = useRef<HTMLDivElement[]>([]);
+
+// Assign array refs:
+ref={(el) => { if (el) cardRefs.current[i] = el; }}
+```
+
+### Supabase types (generate with Supabase CLI when schema is ready)
+```ts
+// src/lib/supabase/types.ts — auto-generated
+export type { Database } from "./types";
+```
+
+### Product type
+```ts
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  currency: "EUR" | "USD";
+  description: string;
+  images: string[];   // array of /toys/*.webp paths
+  category: "bear" | "bunny" | "cat" | "owl" | "puppy" | "elephant";
+  available: boolean;
+  createdAt: string;
+}
+```
+
+### Gallery item type
+```ts
+interface GalleryItem {
+  src: string;
+  alt: string;
+  aspect: "portrait" | "landscape" | "square";
+}
+```
+
+## Rules
+- No `any` — use `unknown` and type-narrow, or proper generics
+- No non-null assertions (`!`) unless the value is guaranteed by the DOM structure
+- Prefer `interface` over `type` for object shapes
+- Prefer `type` for union types and mapped types
+- All `useEffect` dependencies must be exhaustive (ESLint enforces this)
+- Event handlers typed: `React.MouseEvent<HTMLButtonElement>` not `any`
+- CSS Module types: import `styles` from `"./Component.module.css"` — TS infers keys
+
+## GSAP types
+```ts
+import { gsap } from "gsap";
+import type { GSAPTween, GSAPTimeline } from "gsap";
+
+// Store tween for cleanup:
+const tween = useRef<GSAPTween | null>(null);
+useEffect(() => () => { tween.current?.kill(); }, []);
+```
+
+## Three.js types
+```ts
+import type { Mesh, MeshStandardMaterial, Group } from "three";
+
+const meshRef = useRef<Mesh>(null);
+const groupRef = useRef<Group>(null);
+```
+
+## Null safety pattern
+```ts
+// Always guard refs before use:
+if (!sectionRef.current || !headingRef.current) return;
+
+// Or use optional chaining:
+sectionRef.current?.classList.add("visible");
+```
+
+## Avoid these patterns
+```ts
+// ❌ Bad
+const el = document.querySelector(".hero") as HTMLElement;
+gsap.to(el, { x: 100 }); // bypasses null check
+
+// ✅ Good
+const el = document.querySelector<HTMLElement>(".hero");
+if (!el) return;
+gsap.to(el, { x: 100 });
+```

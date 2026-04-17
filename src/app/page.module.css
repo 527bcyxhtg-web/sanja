@@ -1,0 +1,11 @@
+.main {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 4, 7, 0.82) 0%,
+    rgba(20, 8, 15, 0.78) 38%,
+    rgba(8, 4, 7, 0.85) 100%
+  );
+  backdrop-filter: blur(0.5px);
+}

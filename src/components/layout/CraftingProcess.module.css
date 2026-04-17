@@ -1,0 +1,133 @@
+.section {
+  position: relative;
+  z-index: 2;
+  padding: clamp(72px, 10vw, 96px) clamp(24px, 4vw, 56px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.inner {
+  position: relative;
+}
+
+.procStage {
+  position: relative;
+  margin-bottom: 28px;
+  perspective: 1200px;
+  perspective-origin: 50% 0;
+}
+
+.header3d {
+  position: relative;
+  z-index: 1;
+  transform-style: preserve-3d;
+  transform-origin: 50% 0;
+  margin-bottom: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 44px;
+}
+
+.card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(201, 169, 110, 0.05);
+  background: rgba(20, 8, 15, 0.2);
+  transition: border-color 0.5s ease, background 0.5s ease, box-shadow 0.5s ease;
+}
+
+.card:hover {
+  border-color: rgba(201, 169, 110, 0.15);
+  background: rgba(20, 8, 15, 0.4);
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(201, 169, 110, 0.04);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(201, 169, 110, 0.04) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+.cardImg {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.cardPhoto {
+  object-fit: cover;
+  filter: brightness(0.85) contrast(1.06) saturate(0.88);
+  transition: transform 0.95s var(--ease-out-expo);
+}
+
+.card:hover .cardPhoto {
+  transform: scale(1.04);
+}
+
+.num {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 300;
+  color: rgba(201,169,110,0.2);
+  line-height: 1;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 12px;
+}
+
+.cardDesc {
+  font-size: 12px;
+  color: var(--mist);
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+.bottomStrip {
+  width: calc(100% + 112px);
+  margin-left: -56px;
+  margin-right: -56px;
+  margin-top: 48px;
+}
+
+@media (max-width: 900px) {
+  .section { padding: 64px 24px; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .bottomStrip {
+    width: calc(100% + 48px);
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-top: 48px;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; max-width: 340px; margin: 44px auto 0; }
+}

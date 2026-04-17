@@ -1,0 +1,136 @@
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.layer {
+  position: absolute;
+  inset: -4%;
+}
+
+.symbol {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 14px rgba(201, 169, 110, 0.28))
+    drop-shadow(0 0 28px rgba(139, 94, 122, 0.14));
+  opacity: 0.72;
+  will-change: transform;
+}
+
+.symbol svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* sparse — four corners / edges */
+.sSparse1 {
+  top: 6%;
+  left: 4%;
+  width: min(40px, 7vw);
+  height: min(40px, 7vw);
+  animation: symDriftA 11s ease-in-out infinite;
+}
+.sSparse2 {
+  top: 10%;
+  right: 6%;
+  width: min(32px, 5.5vw);
+  height: min(32px, 5.5vw);
+  animation: symDriftB 13s ease-in-out infinite 0.5s;
+}
+.sSparse3 {
+  bottom: 14%;
+  left: 8%;
+  width: min(36px, 6vw);
+  height: min(36px, 6vw);
+  animation: symDriftA 10s ease-in-out infinite 1s reverse;
+}
+.sSparse4 {
+  bottom: 8%;
+  right: 5%;
+  width: min(34px, 5.8vw);
+  height: min(34px, 5.8vw);
+  animation: symDriftB 12s ease-in-out infinite 0.3s;
+}
+
+/* dense — extra symbols for hero-like richness without duplicate hero layout */
+.dDense1 {
+  top: 12%;
+  left: 12%;
+  width: min(28px, 4.5vw);
+  height: min(28px, 4.5vw);
+  opacity: 0.55;
+  animation: symDriftA 9s ease-in-out infinite 0.2s;
+}
+.dDense2 {
+  top: 18%;
+  right: 18%;
+  width: min(26px, 4.2vw);
+  height: min(26px, 4.2vw);
+  opacity: 0.5;
+  animation: symDriftB 10.5s ease-in-out infinite;
+}
+.dDense3 {
+  top: 42%;
+  left: 2%;
+  width: min(22px, 3.8vw);
+  height: min(22px, 3.8vw);
+  opacity: 0.45;
+  animation: symDriftA 8s ease-in-out infinite 1.4s;
+}
+.dDense4 {
+  top: 38%;
+  right: 3%;
+  width: min(24px, 4vw);
+  height: min(24px, 4vw);
+  opacity: 0.48;
+  animation: symDriftB 9.2s ease-in-out infinite 0.8s;
+}
+.dDense5 {
+  bottom: 32%;
+  left: 16%;
+  width: min(30px, 5vw);
+  height: min(30px, 5vw);
+  opacity: 0.52;
+  animation: symDriftA 11.5s ease-in-out infinite 0.6s;
+}
+.dDense6 {
+  bottom: 22%;
+  right: 14%;
+  width: min(28px, 4.6vw);
+  height: min(28px, 4.6vw);
+  opacity: 0.5;
+  animation: symDriftB 10s ease-in-out infinite 1.1s;
+}
+
+@keyframes symDriftA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-5deg);
+  }
+  50% {
+    transform: translate3d(6px, -10px, 6px) rotate(6deg);
+  }
+}
+
+@keyframes symDriftB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(4deg);
+  }
+  50% {
+    transform: translate3d(-8px, 8px, -4px) rotate(-8deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .symbol {
+    animation: none !important;
+    opacity: 0.35;
+  }
+}

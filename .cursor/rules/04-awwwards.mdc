@@ -1,0 +1,131 @@
+---
+description: Awwwards Site of the Day patterns, techniques, and quality bar
+alwaysApply: true
+---
+
+# Awwwards-Level Quality Bar
+
+## The standard
+Every page section must pass this mental checklist:
+1. **Motion** — does something move on scroll entry? (not everything, but *something*)
+2. **Depth** — does the section have foreground / midground / background layers?
+3. **Typography** — is the display font doing heavy lifting? (size contrast, weight contrast)
+4. **Detail** — is there a micro-interaction (hover, cursor change, subtle parallax)?
+5. **Rhythm** — does whitespace breathe? No cramped layouts.
+
+## Scroll storytelling patterns
+
+### Staggered text reveal (word-by-word)
+```tsx
+// Split heading into word spans, then reveal with stagger
+const words = heading.split(" ");
+// Render: words.map(w => <span className={styles.word}>{w}</span>)
+// Animate: gsap.fromTo(".word", { y: "110%", opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, duration: 0.7, ease: "power3.out" })
+```
+
+### Image parallax (scrub)
+```ts
+gsap.to(imgRef.current, {
+  y: "-15%",
+  ease: "none",
+  scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "bottom top", scrub: true },
+});
+```
+
+### Horizontal scroll section
+```ts
+const track = trackRef.current;
+gsap.to(track, {
+  x: () => -(track.scrollWidth - window.innerWidth),
+  ease: "none",
+  scrollTrigger: { trigger: sectionRef.current, pin: true, scrub: 1, end: () => `+=${track.scrollWidth}` },
+});
+```
+
+### Clip-path curtain reveal
+```ts
+gsap.fromTo(el, { clipPath: "inset(0 0 100% 0)" }, {
+  clipPath: "inset(0 0 0% 0)",
+  duration: 1.1,
+  ease: "power4.inOut",
+  scrollTrigger: { trigger: el, start: "top 80%" },
+});
+```
+
+### Counter animation
+```ts
+gsap.to({ val: 0 }, {
+  val: targetNumber,
+  duration: 2,
+  ease: "power2.out",
+  onUpdate() { counterEl.textContent = Math.round(this.targets()[0].val).toString(); },
+  scrollTrigger: { trigger: counterEl, start: "top 80%", toggleActions: "play none none none" },
+});
+```
+
+## Interaction details that elevate quality
+
+### Magnetic button
+```tsx
+const btnRef = useRef<HTMLButtonElement>(null);
+function onMouseMove(e: MouseEvent) {
+  const rect = btnRef.current!.getBoundingClientRect();
+  const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+  const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+  gsap.to(btnRef.current, { x, y, duration: 0.4, ease: "power2.out" });
+}
+function onMouseLeave() { gsap.to(btnRef.current, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1,0.6)" }); }
+```
+
+### Cursor state changes
+```tsx
+// In CustomCursor, listen for data-cursor="view" / "drag" / "link"
+// Expand ring to 80px, show label on data-cursor="view"
+// Blend mode switch on dark sections
+```
+
+### Image tilt card (pointer-driven 3D CSS)
+```tsx
+function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width - 0.5;   // -0.5 to 0.5
+  const y = (e.clientY - rect.top) / rect.height - 0.5;
+  gsap.to(e.currentTarget, { rotationX: -y * 12, rotationY: x * 12, transformPerspective: 800, duration: 0.4, ease: "power2.out" });
+}
+function onMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+  gsap.to(e.currentTarget, { rotationX: 0, rotationY: 0, duration: 0.8, ease: "elastic.out(1, 0.6)" });
+}
+```
+
+## Section architecture rules (awwwards structure)
+```
+Hero           → Full viewport, 3D or video, massive type, scroll cue
+Story/About    → Asymmetric grid, editorial photography, pull quote
+Product grid   → Hover-interactive cards with 3D thumbnails, magnetic CTA
+Process        → Horizontal or pinned scroll, numbered steps, imagery
+Social proof   → Full-bleed marquee + testimonial cards
+Contact        → Minimal form, ambient background, large type CTA
+Footer         → Dense link grid + copyright + subtle animation
+```
+
+## Common mistakes to avoid
+- ❌ Symmetric layouts everywhere — use asymmetry (60/40, 70/30 splits)
+- ❌ All elements visible at once — use progressive disclosure via scroll
+- ❌ Generic sans-serif for headings — use Cormorant Garamond (`--font-display`)
+- ❌ White backgrounds — this site lives in dark luxury (`--deep`, `--velvet`)
+- ❌ Border-radius > 4px on luxury elements — keep it minimal
+- ❌ Animations that don't clean up — always `gsap.context().revert()`
+- ❌ `transform: translate3d` on elements not needing it — causes layer explosions
+- ❌ `loading="eager"` on below-fold images — use `loading="lazy"`
+
+## Page performance targets (Lighthouse)
+- LCP < 2.5s
+- CLS < 0.05
+- FID/INP < 100ms
+- Total JS < 350kb gzipped (excluding 3D chunks — lazy loaded)
+
+## Accessibility (still required for awwwards)
+- All interactive elements keyboard focusable
+- `aria-label` on icon-only buttons
+- `aria-hidden="true"` on decorative SVGs and ambient layers
+- Colour contrast: body text ≥ 4.5:1, large text ≥ 3:1

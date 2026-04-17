@@ -1,0 +1,129 @@
+---
+description: Component patterns, CSS Modules conventions, and hooks for this project
+globs: ["src/components/**", "src/hooks/**"]
+alwaysApply: false
+---
+
+# Component & Hook Patterns
+
+## Component template
+```tsx
+"use client"; // only when using hooks/events — omit for pure server components
+
+import { useRef, useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import styles from "./ComponentName.module.css";
+
+gsap.registerPlugin(ScrollTrigger);
+
+interface Props {
+  title: string;
+  // explicit types always
+}
+
+export default function ComponentName({ title }: Props) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const ctx = gsap.context(() => {
+      // animations
+    }, sectionRef);
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
+  return (
+    <section ref={sectionRef} className={styles.section} aria-label={title}>
+      {/* content */}
+    </section>
+  );
+}
+```
+
+## CSS Module template
+```css
+/* ComponentName.module.css */
+.section {
+  position: relative;
+  padding: clamp(80px, 12vw, 160px) 0;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 80px);
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 6vw, 6rem);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  color: var(--cream);
+}
+
+.overline {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 24px;
+}
+```
+
+## Available hooks
+| Hook | Purpose |
+|------|---------|
+| `useReducedMotion()` | Returns `boolean` — skip all GSAP if true |
+| `useInView(ref, options)` | IntersectionObserver — fires callback on enter |
+| `useHover(ref)` | Hover state with touch-device detection |
+| `useScrollVelocity()` | Current scroll speed (for parallax tuning) |
+| `useSupabase()` | Supabase client from context |
+
+## Available UI components
+Import from `@/components/ui/`:
+- `<CustomCursor />` — gold dot + ring, GSAP quickTo driven
+- `<Loader />` — page preloader (already in layout)
+- `<ProductModal product={...} onClose={...} />` — full-screen overlay
+- `<GlassCard>children</GlassCard>` — glass-morphism wrapper
+- `<SectionVisualStrip images={...} />` — responsive masonry-style image row
+- `<SectionDivider label="..." />` — horizontal rule with optional label
+- `<Marquee items={...} speed={40} />` — scrolling text loop
+- `<ProgressiveImage src={...} lowRes={...} alt={...} />` — LQIP pattern
+- `<FaqAccordion items={...} />` — animated accordion
+- `<Skeleton width={...} height={...} />` — loading state
+
+## VFX components (ambient only, no user data)
+Import from `@/components/vfx/`:
+- `<PageAmbient />` — multi-layer atmospheric gradients (already in layout)
+- `<HeroEnchantment />` — hero-specific VFX
+- `<PageMotifs />` — decorative SVG motifs with parallax
+- `<FallingMotifs count={12} />` — floating/falling icon particles
+- `<StorySymbolLayer />` — story section overlay icons
+
+## Adding a new section
+1. Create `src/components/layout/MySectionName.tsx`
+2. Create `src/components/layout/MySectionName.module.css`
+3. Import and add to `src/app/page.tsx` in correct order
+4. Add anchor id for navigation if linkable
+
+## Client vs Server components
+- Default: no directive = server component (fine for static markup)
+- Add `"use client"` only when using: `useState`, `useEffect`, `useRef`, event handlers, browser APIs
+- Never add `"use client"` unnecessarily — it grows the client bundle
+
+## Supabase data fetching (client-side)
+```tsx
+"use client";
+import { useSupabase } from "@/hooks/useSupabase";
+
+const supabase = useSupabase();
+const { data, error } = await supabase.from("products").select("*");
+```

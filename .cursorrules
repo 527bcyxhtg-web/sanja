@@ -1,0 +1,38 @@
+# sanja-plush — Cursor AI Rules (legacy root format)
+# Full rules live in .cursor/rules/*.mdc — this file is a quick reference.
+
+## Project
+Premium luxury plush toy e-commerce. Target: awwwards Site of the Day.
+Stack: Next.js 15 (static export) · React 19 · TypeScript strict · GSAP 3 + ScrollTrigger · Lenis · React Three Fiber · CSS Modules · Supabase · Cloudflare Pages.
+
+## Non-negotiable rules
+
+1. ALWAYS use `@/*` path alias — never relative `../../../`
+2. ALWAYS guard animations with `useReducedMotion()` hook
+3. ALWAYS lazy-load 3D canvas with `next/dynamic({ ssr: false })`
+4. ALWAYS clean up GSAP with `gsap.context().revert()` in useEffect cleanup
+5. NEVER hard-code colour hex — use CSS custom properties from globals.css
+6. NEVER add `console.log` to production code
+7. NEVER use `any` type in TypeScript
+8. ALWAYS run `npm run lint && npm run typecheck` before considering a task done
+9. CSS Modules only — no Tailwind, no styled-components, no inline style objects (except GSAP targets)
+10. One component per file, PascalCase filename
+
+## Key folders
+- `src/components/layout/` — page sections (Hero, Products, About, etc.)
+- `src/components/3d/` — React Three Fiber canvas components
+- `src/components/ui/` — reusable UI primitives (Cursor, Modal, Marquee, etc.)
+- `src/components/vfx/` — ambient visual effects (PageAmbient, FallingMotifs, etc.)
+- `src/lib/gsapUtils.ts` — createTextReveal, createImageReveal, createFadeReveal
+- `src/hooks/` — useReducedMotion, useInView, useHover, useScrollVelocity
+- `src/styles/globals.css` — design tokens (all CSS custom properties)
+
+## Colour tokens (most used)
+--deep #080407 · --cream #f7f2ea · --gold #c9a96e · --rose #c97b6e · --velvet #14080f
+
+## Awwwards quality bar
+Every section needs: motion on scroll entry + depth layers + display typography + one micro-interaction.
+Avoid: symmetric layouts, white backgrounds, border-radius > 4px on luxury elements, all-visible-at-once layouts.
+
+## Deploy
+`npm run pages:deploy` → Cloudflare Pages static host

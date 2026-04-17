@@ -1,0 +1,87 @@
+.wrap {
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 440px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  background: linear-gradient(
+    165deg,
+    rgba(20, 8, 15, 0.75) 0%,
+    rgba(8, 4, 7, 0.9) 100%
+  );
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+.wrap :global(.scene) {
+  min-height: 300px;
+  height: 100%;
+}
+
+.fallback {
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 440px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(201, 169, 110, 0.15), transparent 55%),
+    linear-gradient(165deg, rgba(20, 8, 15, 0.9), rgba(8, 4, 7, 0.95));
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+.fallbackInner {
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  background: rgba(201, 169, 110, 0.06);
+  box-shadow: 0 0 60px rgba(201, 169, 110, 0.12);
+}
+
+.placeholder {
+  width: 100%;
+  min-height: 300px;
+  height: 100%;
+  max-height: 440px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(20, 8, 15, 0.8) 0%,
+    rgba(139, 94, 122, 0.15) 50%,
+    rgba(20, 8, 15, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placeholder {
+    animation: none;
+    background: rgba(20, 8, 15, 0.85);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

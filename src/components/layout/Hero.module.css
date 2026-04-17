@@ -1,0 +1,714 @@
+/* ── Fullscreen Cinematic Video Hero ── */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  overflow: hidden;
+  contain: layout style;
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+
+/* ── Background Video ── */
+
+.videoBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.heroPosterImg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.55) contrast(1.1) saturate(0.7);
+  pointer-events: none;
+}
+
+.video {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+  filter: brightness(0.55) contrast(1.1) saturate(0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+.videoVisible {
+  opacity: 1;
+}
+
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .video {
+    will-change: transform;
+  }
+}
+
+.videoGrain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+
+/* ── Overlays ── */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 3, 6, 0.65) 0%,
+      rgba(10, 3, 6, 0.3) 40%,
+      rgba(10, 3, 6, 0.25) 60%,
+      rgba(10, 3, 6, 0.7) 100%
+    );
+  opacity: 0;
+  will-change: opacity;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse 75% 70% at 50% 50%,
+    transparent 30%,
+    rgba(10, 3, 6, 0.7) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Cinematic Backdrop ── */
+
+.backdrop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(92vw, 960px);
+  height: min(80vh, 680px);
+  transform: translate(-50%, -50%) scale(0.85);
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.rays {
+  position: absolute;
+  inset: -30%;
+  opacity: 0;
+  will-change: opacity;
+}
+
+.ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 160%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(201, 169, 110, 0.06) 20%,
+    rgba(201, 169, 110, 0.12) 50%,
+    rgba(201, 169, 110, 0.06) 80%,
+    transparent 100%
+  );
+  transform-origin: center center;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: rayRotate 28s linear infinite;
+}
+
+.ray2 {
+  width: 1px;
+  animation-duration: 38s;
+  animation-direction: reverse;
+  opacity: 0.7;
+  transform: translate(-50%, -50%) rotate(60deg);
+}
+
+.ray3 {
+  width: 3px;
+  animation-duration: 50s;
+  opacity: 0.4;
+  transform: translate(-50%, -50%) rotate(120deg);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(232, 213, 163, 0.04) 30%,
+    rgba(232, 213, 163, 0.08) 50%,
+    rgba(232, 213, 163, 0.04) 70%,
+    transparent 100%
+  );
+}
+
+@keyframes rayRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.bokeh {
+  position: absolute;
+  inset: 0;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(201, 169, 110, 0.25),
+    rgba(201, 169, 110, 0.08) 50%,
+    transparent 70%
+  );
+  animation: orbFloat 14s ease-in-out infinite alternate;
+}
+
+.orb  { width: 8px;  height: 8px;  top: 15%; left: 12%; animation-delay: 0s; }
+.orb2 { width: 5px;  height: 5px;  top: 25%; right: 18%; animation-delay: -2s; animation-duration: 18s;
+  background: radial-gradient(circle at 35% 35%, rgba(232, 213, 163, 0.3), transparent 70%);
+}
+.orb3 { width: 12px; height: 12px; bottom: 22%; left: 8%; animation-delay: -4s; animation-duration: 20s; }
+.orb4 { width: 6px;  height: 6px;  bottom: 30%; right: 15%; animation-delay: -6s; animation-duration: 16s;
+  background: radial-gradient(circle at 35% 35%, rgba(243, 232, 212, 0.2), transparent 70%);
+}
+.orb5 { width: 4px;  height: 4px;  top: 45%; left: 5%; animation-delay: -8s; animation-duration: 22s; }
+.orb6 { width: 10px; height: 10px; top: 10%; right: 8%; animation-delay: -3s; animation-duration: 24s;
+  background: radial-gradient(circle at 35% 35%, rgba(201, 169, 110, 0.15), transparent 70%);
+}
+.orb7 { width: 7px;  height: 7px;  bottom: 12%; left: 50%; animation-delay: -10s; animation-duration: 19s;
+  background: radial-gradient(circle at 35% 35%, rgba(139, 94, 122, 0.2), transparent 70%);
+}
+
+@keyframes orbFloat {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 0.4; }
+  25%  { transform: translate(12px, -18px) scale(1.3); opacity: 0.8; }
+  50%  { transform: translate(-8px, -30px) scale(0.9); opacity: 0.5; }
+  75%  { transform: translate(15px, -12px) scale(1.15); opacity: 0.9; }
+  100% { transform: translate(-5px, -24px) scale(1.05); opacity: 0.6; }
+}
+
+.aura {
+  position: absolute;
+  inset: -10%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 50%,
+    rgba(201, 169, 110, 0.06) 0%,
+    rgba(201, 169, 110, 0.03) 30%,
+    rgba(139, 94, 122, 0.02) 50%,
+    transparent 70%
+  );
+  animation: auraPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes auraPulse {
+  0%   { transform: scale(0.95); opacity: 0.6; }
+  50%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1);    opacity: 0.8; }
+}
+
+.glassFrame {
+  position: absolute;
+  inset: 8% 6%;
+  border: 1px solid rgba(201, 169, 110, 0.08);
+  border-radius: 4px;
+  background: rgba(10, 3, 6, 0.15);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  box-shadow:
+    inset 0 0 80px rgba(201, 169, 110, 0.03),
+    0 0 120px rgba(201, 169, 110, 0.04);
+  animation: frameGlow 6s ease-in-out infinite alternate;
+}
+
+.glassFrame::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.25),
+    rgba(232, 213, 163, 0.4),
+    rgba(201, 169, 110, 0.25),
+    transparent
+  );
+  animation: topLineShimmer 4s ease-in-out infinite alternate;
+}
+
+.glassFrame::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.15),
+    rgba(201, 169, 110, 0.2),
+    rgba(201, 169, 110, 0.15),
+    transparent
+  );
+  animation: topLineShimmer 5s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes frameGlow {
+  0%   { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes topLineShimmer {
+  0%   { opacity: 0.4; transform: scaleX(0.7); }
+  100% { opacity: 1;   transform: scaleX(1); }
+}
+
+/* ── Content — subtle 3D stage for typography & CTAs ── */
+
+.inner {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 900px;
+  padding: 0 32px;
+  transform-style: preserve-3d;
+}
+
+.contentStage3d {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.accentLine {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin-bottom: 28px;
+  transform: scaleX(0);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(20px);
+  clip-path: inset(0 0 100% 0);
+}
+
+.eyebrowDash {
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 11vw, 160px);
+  font-weight: 300;
+  line-height: 0.87;
+  letter-spacing: -0.045em;
+  margin-bottom: 28px;
+  color: var(--cream);
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-shadow:
+    0 2px 40px rgba(0, 0, 0, 0.4),
+    0 0 80px rgba(201, 169, 110, 0.08);
+}
+
+/* ── Word-split reveal pattern ── */
+.titleLine {
+  display: block;
+}
+
+.wordWrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* extra clip so descenders don't peek during animation */
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+
+.word {
+  display: inline-block;
+  transform: translateY(110%);
+}
+
+/* Italic gold gradient word (Plush) */
+.wordGold {
+  font-style: italic;
+  background: linear-gradient(
+    110deg,
+    var(--gold2),
+    var(--gold),
+    var(--champagne),
+    var(--gold2)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: goldShift 6s ease-in-out infinite;
+}
+
+@keyframes goldShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.sub {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--mist);
+  max-width: 480px;
+  line-height: 2.1;
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(30px);
+  clip-path: inset(0 0 100% 0);
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.5);
+}
+
+.ctas {
+  display: flex;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.oraclePanel {
+  margin-top: 28px;
+  width: min(980px, 100%);
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  border-radius: 18px;
+  background: rgba(17, 7, 11, 0.48);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 18px 60px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.oracleKicker {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold2);
+}
+
+.oracleTitle {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 38px);
+  line-height: 1.05;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--cream);
+}
+
+.oracleLead {
+  margin: 8px auto 0;
+  max-width: 700px;
+  font-size: 13px;
+  line-height: 1.75;
+  letter-spacing: 0.06em;
+  color: var(--mist);
+}
+
+.oracleButton {
+  margin-top: 14px;
+  border: 1px solid rgba(201, 169, 110, 0.42);
+  border-radius: 999px;
+  background: linear-gradient(120deg, rgba(201, 169, 110, 0.22), rgba(139, 94, 122, 0.32));
+  color: var(--cream);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  transition: transform 0.3s ease, opacity 0.25s ease, filter 0.25s ease;
+}
+
+.oracleButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.oracleButton:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.oracleCards {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.oracleCard {
+  border: 1px solid rgba(201, 169, 110, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(12, 5, 8, 0.38));
+  padding: 10px;
+  text-align: left;
+}
+
+.oraclePosition {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold2);
+}
+
+.oraclePositionSub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--mist);
+  opacity: 0.88;
+}
+
+.oracleImageWrap {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 20%, rgba(201, 169, 110, 0.14), rgba(10, 3, 6, 0.1));
+  min-height: 228px;
+  overflow: hidden;
+}
+
+.oracleImage {
+  width: auto;
+  height: 220px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.35));
+}
+
+.oracleCard h3 {
+  margin: 8px 0 4px;
+  font-size: 16px;
+  color: var(--cream);
+}
+
+.oracleCard p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--mist);
+}
+
+.oracleCtaLink {
+  margin-top: 8px;
+  display: inline-block;
+  color: var(--gold2);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.oracleCtaLink:hover {
+  text-decoration: underline;
+}
+
+.oracleStory {
+  margin-top: 14px;
+  white-space: pre-line;
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.85;
+  letter-spacing: 0.04em;
+  color: var(--mist);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 110, 0.14);
+  background: rgba(12, 4, 8, 0.3);
+}
+
+/* ── Scroll Hint ── */
+
+.scrollHint {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  z-index: 6;
+}
+
+.scrollHint span {
+  font-size: 8px;
+  letter-spacing: 0.48em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.scrollLine {
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(to bottom, var(--gold2), var(--gold), transparent);
+  animation: scrollPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.35; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.12); }
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .video {
+    animation: none;
+  }
+  .word {
+    transform: translateY(0);
+  }
+  .wordGold {
+    animation: none;
+    background-position: 0% 50%;
+  }
+  .ray, .orb, .aura, .glassFrame {
+    animation: none;
+  }
+  .glassFrame::before,
+  .glassFrame::after {
+    animation: none;
+  }
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 1024px) {
+  .title {
+    font-size: clamp(48px, 10vw, 100px);
+  }
+  .backdrop {
+    width: 94vw;
+    height: 75vh;
+  }
+  .glassFrame {
+    inset: 6% 4%;
+  }
+
+  .oracleCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 80px;
+  }
+  .inner {
+    padding: 0 20px;
+  }
+  .title {
+    font-size: clamp(42px, 12vw, 80px);
+    letter-spacing: -0.03em;
+  }
+  .sub {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+  .ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+  .ctas a {
+    width: 100%;
+    text-align: center;
+  }
+  .oraclePanel {
+    margin-top: 18px;
+    padding: 14px;
+  }
+  .oracleCards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .oracleImage {
+    height: 190px;
+  }
+  .oracleLead {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .eyebrowDash {
+    width: 16px;
+  }
+  .backdrop {
+    width: 96vw;
+    height: 70vh;
+  }
+  .glassFrame {
+    inset: 4% 3%;
+  }
+  .ray { display: none; }
+  .orb, .aura { display: none; }
+  .glassFrame::before,
+  .glassFrame::after { animation: none; }
+  .glassFrame { animation: none; backdrop-filter: none; }
+  .video { filter: brightness(0.5) contrast(1.05); }
+  .videoGrain { display: none; }
+}
